@@ -1,0 +1,6 @@
+{
+  "name": "StrideOS 3.0",
+  "description": "A privacy-first, offline-first personal training operating system for running, cycling, swimming, and structured workouts.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,3621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>StrideOS 3.0</title>
+  <meta name="description" content="A privacy-first, offline-first personal training operating system for running, cycling, swimming, and structured workouts.">
+  <meta property="og:title" content="StrideOS 3.0">
+  <meta property="og:description" content="A privacy-first, offline-first personal training operating system for running, cycling, swimming, and structured workouts.">
+  <meta name="theme-color" content="#08090b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <style>
+    :root {
+      --bg: #08090b;
+      --surface: #111318;
+      --surface-2: #171a20;
+      --surface-3: #1d2129;
+      --primary: #b8ff3d;
+      --primary-dark: #8dcc20;
+      --primary-glow: rgba(184, 255, 61, 0.15);
+      --text: #f5f7fa;
+      --text-secondary: #9ba3af;
+      --text-muted: #68707d;
+      --blue: #55a8ff;
+      --orange: #ffb347;
+      --red: #ff5c67;
+      --green: #43e889;
+      --border: rgba(255,255,255,0.08);
+      --border-focus: rgba(184,255,61,0.5);
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+      --shadow: 0 10px 40px rgba(0,0,0,0.35);
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    [data-theme="light"] {
+      --bg: #f4f6f9;
+      --surface: #ffffff;
+      --surface-2: #eaeef4;
+      --surface-3: #dfe5ed;
+      --text: #0d1117;
+      --text-secondary: #4b5563;
+      --text-muted: #8b949e;
+      --border: rgba(0,0,0,0.1);
+      --shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      user-select: none;
+    }
+    button, input, select, textarea { font-family: inherit; color: inherit; }
+    button { cursor: pointer; border: none; background: none; }
+    a { color: inherit; text-decoration: none; }
+    
+    /* Layout Structure */
+    #app-container {
+      display: flex;
+      width: 100vw;
+      min-height: 100vh;
+      position: relative;
+    }
+    
+    /* Desktop Sidebar */
+    #sidebar {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 24px 16px;
+      z-index: 50;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px 28px;
+    }
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: var(--primary);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #08090b;
+      font-weight: 900;
+      font-size: 18px;
+    }
+    .brand-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .brand-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--surface-3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: auto;
+    }
+    .nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+    .nav-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      padding: 12px 12px 6px;
+      font-weight: 700;
+    }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-md);
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.15s ease;
+    }
+    .nav-item:hover {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+    .nav-item.active {
+      background: var(--surface-3);
+      color: var(--primary);
+    }
+    .nav-item.active svg {
+      stroke: var(--primary);
+    }
+    .nav-item-record {
+      background: var(--primary);
+      color: #08090b !important;
+      margin: 10px 0;
+      font-weight: 800;
+    }
+    .nav-item-record:hover {
+      background: var(--primary-dark);
+      color: #08090b !important;
+    }
+    .nav-item-record svg {
+      stroke: #08090b;
+    }
+    .sidebar-footer {
+      border-top: 1px solid var(--border);
+      padding-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    /* Main Content Area */
+    #main-viewport {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+      padding-bottom: 90px; /* Space for mobile nav */
+    }
+    @media (min-width: 860px) {
+      #main-viewport {
+        padding-bottom: 30px;
+      }
+    }
+    .screen {
+      display: none;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+    .screen.active {
+      display: block;
+      animation: fadeIn 0.2s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Mobile Bottom Navigation */
+    #mobile-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 10px;
+      z-index: 90;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .mobile-nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      flex: 1;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.15s ease;
+    }
+    .mobile-nav-btn.active {
+      color: var(--primary);
+    }
+    .mobile-nav-btn svg {
+      width: 20px;
+      height: 20px;
+      stroke-width: 2.2;
+    }
+    .mobile-nav-record {
+      position: relative;
+      top: -12px;
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: #08090b !important;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 18px rgba(184, 255, 61, 0.4);
+      flex: 0 0 54px;
+    }
+    .mobile-nav-record svg {
+      width: 24px;
+      height: 24px;
+      stroke: #08090b;
+      stroke-width: 2.6;
+    }
+    
+    @media (min-width: 860px) {
+      #mobile-nav { display: none; }
+    }
+    @media (max-width: 859px) {
+      #sidebar { display: none; }
+    }
+    
+    /* Common UI Elements */
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-title {
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: -0.8px;
+    }
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.15s ease;
+      min-height: 44px;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #08090b;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    .btn-secondary {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-secondary:hover {
+      background: var(--surface-3);
+    }
+    .btn-danger {
+      background: rgba(255, 92, 103, 0.15);
+      border: 1px solid rgba(255, 92, 103, 0.3);
+      color: var(--red);
+    }
+    .btn-danger:hover {
+      background: rgba(255, 92, 103, 0.25);
+    }
+    .btn-sm {
+      padding: 6px 12px;
+      min-height: 34px;
+      font-size: 12px;
+      border-radius: var(--radius-sm);
+    }
+    .btn-icon {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border-radius: var(--radius-sm);
+    }
+    
+    /* Stats & Metrics Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .stat-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      font-family: var(--font-mono);
+    }
+    .stat-unit {
+      font-size: 12px;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+      font-weight: 600;
+      margin-left: 2px;
+    }
+    
+    /* Toast System */
+    #toast-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--surface-3);
+      border: 1px solid var(--primary);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      animation: toastIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: auto;
+    }
+    @keyframes toastIn {
+      from { transform: translateX(50px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    /* Modal System */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(4px);
+      z-index: 150;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-backdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      transform: scale(0.96);
+      transition: transform 0.2s ease;
+    }
+    .modal-backdrop.active .modal-box {
+      transform: scale(1);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--border-focus);
+    }
+    
+    /* Progress Bar */
+    .progress-bar-bg {
+      height: 10px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+    
+    /* Route Canvas/SVG */
+    .route-visualizer {
+      width: 100%;
+      height: 240px;
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      position: relative;
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Recording Big Display */
+    .record-big-stat {
+      font-size: 56px;
+      font-weight: 900;
+      font-family: var(--font-mono);
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      color: var(--text);
+    }
+    .record-controls {
+      display: flex;
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .record-btn-action {
+      flex: 1;
+      height: 60px;
+      border-radius: var(--radius-md);
+      font-size: 18px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 48px 24px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius-md);
+    }
+    .empty-state-icon {
+      width: 48px;
+      height: 48px;
+      color: var(--primary);
+      margin: 0 auto 16px;
+    }
+    .empty-state-title {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .empty-state-text {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 420px;
+      margin: 0 auto 20px;
+    }
+    
+    /* Activity List Item */
+    .activity-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .activity-card:hover {
+      background: var(--surface-2);
+      border-color: rgba(255,255,255,0.15);
+      transform: translateY(-1px);
+    }
+    .sport-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--primary);
+    }
+    
+    /* Splits table */
+    .split-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 13px;
+    }
+    .split-row:last-child { border-bottom: none; }
+    .split-bar {
+      height: 6px;
+      background: var(--surface-3);
+      border-radius: 3px;
+      flex: 1;
+      margin: 0 16px;
+      overflow: hidden;
+    }
+    .split-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 3px;
+    }
+    
+    /* Onboarding Overlay */
+    #onboarding-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      z-index: 300;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    #onboarding-overlay.active {
+      display: flex;
+    }
+    .onboarding-card {
+      width: 100%;
+      max-width: 480px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 32px 24px;
+      box-shadow: var(--shadow);
+    }
+    
+    /* Respect Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+    }
+  </style>
+</head>
+<body data-theme="dark">
+
+<div id="app-container">
+  <!-- Desktop Sidebar -->
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">S</div>
+      <div>
+        <div class="brand-title">StrideOS</div>
+        <div style="font-size:11px;color:var(--text-muted);font-weight:600;">v3.0.0 · Local OS</div>
+      </div>
+      <span class="brand-badge">Local</span>
+    </div>
+    
+    <nav class="nav-group">
+      <div class="nav-label">Core</div>
+      <button class="nav-item active" onclick="Router.navigate('home')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span>Home</span>
+      </button>
+      <button class="nav-item nav-item-record" onclick="Router.navigate('record')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Record Activity</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('activities')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Activities</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('insights')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        <span>Insights</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('goals')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>Goals</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('plans')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        <span>Training Plans</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('records')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+        <span>Personal Records</span>
+      </button>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <button class="nav-item" onclick="Router.navigate('settings')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings</span>
+      </button>
+      <button class="nav-item" onclick="Router.navigate('privacy')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <span>Privacy & Data</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Viewport containing dynamic screens -->
+  <main id="main-viewport">
+    <!-- 1. Home Screen -->
+    <section id="screen-home" class="screen active"></section>
+
+    <!-- 2. Record Screen -->
+    <section id="screen-record" class="screen"></section>
+
+    <!-- 3. Activity History Screen -->
+    <section id="screen-activities" class="screen"></section>
+
+    <!-- 4. Activity Detail Screen -->
+    <section id="screen-activity-detail" class="screen"></section>
+
+    <!-- 5. Insights Screen -->
+    <section id="screen-insights" class="screen"></section>
+
+    <!-- 6. Goals Screen -->
+    <section id="screen-goals" class="screen"></section>
+
+    <!-- 7. Training Plans Screen -->
+    <section id="screen-plans" class="screen"></section>
+
+    <!-- 8. Personal Records Screen -->
+    <section id="screen-records" class="screen"></section>
+
+    <!-- 9. Settings Screen -->
+    <section id="screen-settings" class="screen"></section>
+
+    <!-- 10. Privacy & Data Management Screen -->
+    <section id="screen-privacy" class="screen"></section>
+  </main>
+
+  <!-- Mobile Bottom Nav -->
+  <nav id="mobile-nav">
+    <button class="mobile-nav-btn active" onclick="Router.navigate('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="Router.navigate('activities')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span>History</span>
+    </button>
+    <button class="mobile-nav-record" onclick="Router.navigate('record')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    </button>
+    <button class="mobile-nav-btn" onclick="Router.navigate('insights')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>Insights</span>
+    </button>
+    <button class="mobile-nav-btn" onclick="openMoreMenu()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+      <span>More</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Onboarding Modal Container -->
+<div id="onboarding-overlay">
+  <div class="onboarding-card" id="onboarding-content"></div>
+</div>
+
+<!-- Global Modals & Toasts -->
+<div id="modal-container" class="modal-backdrop"></div>
+<div id="toast-container"></div>
+
+<!-- Core Script -->
+<script>
+// ==========================================
+// StrideOS 3.0 Core Engine & State Management
+// ==========================================
+
+const DB = {
+  db: null,
+  name: 'StrideOS_DB',
+  version: 1,
+
+  async init() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open(this.name, this.version);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('activities')) {
+          const actStore = db.createObjectStore('activities', { keyPath: 'id' });
+          actStore.createIndex('startTime', 'startTime', { unique: false });
+          actStore.createIndex('type', 'type', { unique: false });
+        }
+        if (!db.objectStoreNames.contains('goals')) {
+          db.createObjectStore('goals', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('plans')) {
+          db.createObjectStore('plans', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('personalRecords')) {
+          db.createObjectStore('personalRecords', { keyPath: 'id' });
+        }
+      };
+      request.onsuccess = (e) => {
+        this.db = e.target.result;
+        resolve(this.db);
+      };
+      request.onerror = (e) => reject(e);
+    });
+  },
+
+  async get(storeName, key) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) return resolve(null);
+      const tx = this.db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const req = store.get(key);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async getAll(storeName) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) return resolve([]);
+      const tx = this.db.transaction(storeName, 'readonly');
+      const store = tx.objectStore(storeName);
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async put(storeName, value) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) return resolve(null);
+      const tx = this.db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.put(value);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async delete(storeName, key) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) return resolve(null);
+      const tx = this.db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.delete(key);
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async clear(storeName) {
+    return new Promise((resolve, reject) => {
+      if (!this.db) return resolve(null);
+      const tx = this.db.transaction(storeName, 'readwrite');
+      const store = tx.objectStore(storeName);
+      const req = store.clear();
+      req.onsuccess = () => resolve(true);
+      req.onerror = () => reject(req.error);
+    });
+  }
+};
+
+// Global Application State
+const AppState = {
+  settings: {
+    id: 'user_settings',
+    units: 'metric', // 'metric' | 'imperial'
+    defaultSport: 'running',
+    weeklyGoal: 25, // km
+    targetPace: 300, // sec/km (5:00/km)
+    autoPause: true,
+    autoPauseSpeed: 3.0, // km/h
+    audioCues: true,
+    audioFreq: '1km', // '1km' | '5min'
+    haptics: true,
+    theme: 'dark',
+    reducedMotion: false,
+    keepScreenAwake: false,
+    enableCalories: true,
+    onboardingComplete: false,
+    preferredSports: ['running', 'cycling'],
+    goalFocus: 'Build endurance'
+  },
+  activities: [],
+  goals: [],
+  plans: [],
+  prs: {},
+  currentScreen: 'home',
+  activeDetailId: null
+};
+
+// Default Built-in Training Plans
+const BUILTIN_PLANS = [
+  {
+    id: 'plan-5k-beg',
+    title: '5K Beginner',
+    durationWeeks: 8,
+    level: 'Beginner',
+    description: 'Build aerobic base and finish your first 5K with ease.',
+    sport: 'running',
+    weeks: [
+      {
+        week: 1,
+        workouts: [
+          { day: 'Mon', title: 'Easy Run', distanceKm: 3, durationMin: 22, notes: 'Comfortable conversation pace' },
+          { day: 'Wed', title: 'Easy Run', distanceKm: 3, durationMin: 22, notes: 'Steady rhythmic breathing' },
+          { day: 'Fri', title: 'Recovery Jog', distanceKm: 2, durationMin: 15, notes: 'Very gentle cadence' },
+          { day: 'Sun', title: 'Long Run', distanceKm: 4, durationMin: 30, notes: 'Time on feet base builder' }
+        ]
+      },
+      {
+        week: 2,
+        workouts: [
+          { day: 'Mon', title: 'Easy Run', distanceKm: 3.5, durationMin: 25, notes: 'Relaxed shoulders' },
+          { day: 'Wed', title: 'Strides Session', distanceKm: 3.5, durationMin: 25, notes: '4x20s controlled strides at end' },
+          { day: 'Fri', title: 'Recovery Run', distanceKm: 2.5, durationMin: 18, notes: 'Easy conversational effort' },
+          { day: 'Sun', title: 'Long Run', distanceKm: 4.5, durationMin: 33, notes: 'Steady aerobic endurance' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'plan-5k-improve',
+    title: '5K Speed & PR',
+    durationWeeks: 6,
+    level: 'Intermediate',
+    description: 'Interval sessions and tempo runs to shave minutes off your 5K.',
+    sport: 'running',
+    weeks: [
+      {
+        week: 1,
+        workouts: [
+          { day: 'Tue', title: 'Intervals 5x800m', distanceKm: 6, durationMin: 35, notes: 'Fast but repeatable with 2m rests' },
+          { day: 'Thu', title: 'Tempo 20m', distanceKm: 5, durationMin: 28, notes: 'Comfortably hard threshold pace' },
+          { day: 'Sat', title: 'Long Aerobic Run', distanceKm: 8, durationMin: 48, notes: 'Consistent negative split effort' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'plan-10k-beg',
+    title: '10K Foundation',
+    durationWeeks: 8,
+    level: 'Intermediate',
+    description: 'Progress your endurance from 5K up to a strong 10K finish.',
+    sport: 'running',
+    weeks: [
+      {
+        week: 1,
+        workouts: [
+          { day: 'Tue', title: 'Easy 4 km', distanceKm: 4, durationMin: 26, notes: 'Easy recovery' },
+          { day: 'Thu', title: 'Progression Run', distanceKm: 5, durationMin: 30, notes: 'Start easy, last 1km at 5k pace' },
+          { day: 'Sun', title: 'Long Run 7 km', distanceKm: 7, durationMin: 45, notes: 'Hydrate well' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'plan-cycling-base',
+    title: 'Cycling Endurance Base',
+    durationWeeks: 6,
+    level: 'All Levels',
+    description: 'Build sustained power, cadence control, and cardio capacity.',
+    sport: 'cycling',
+    weeks: [
+      {
+        week: 1,
+        workouts: [
+          { day: 'Tue', title: 'High Cadence Spin', distanceKm: 20, durationMin: 50, notes: 'Spin at 90+ RPM' },
+          { day: 'Thu', title: 'Threshold Climbs', distanceKm: 25, durationMin: 60, notes: 'Elevated sustained climbs' },
+          { day: 'Sun', title: 'Endurance Ride', distanceKm: 40, durationMin: 95, notes: 'Steady Zone 2 baseline' }
+        ]
+      }
+    ]
+  }
+];
+
+// Audio Coaching Service
+const AudioCoach = {
+  synth: window.speechSynthesis || null,
+
+  speak(text) {
+    if (!AppState.settings.audioCues || !this.synth) return;
+    try {
+      this.synth.cancel(); // cancel pending speech
+      const utter = new SpeechSynthesisUtterance(text);
+      utter.rate = 1.05;
+      utter.pitch = 1.0;
+      utter.volume = 1.0;
+      this.synth.speak(utter);
+    } catch (e) {
+      console.warn('Speech error:', e);
+    }
+  },
+
+  haptic(pattern = 100) {
+    if (AppState.settings.haptics && navigator.vibrate) {
+      try { navigator.vibrate(pattern); } catch (e) {}
+    }
+  }
+};
+
+// Formatting & Unit Utilities
+const Format = {
+  distance(km, withUnit = true) {
+    if (km == null || isNaN(km)) return withUnit ? '0.00 km' : '0.00';
+    if (AppState.settings.units === 'imperial') {
+      const mi = km * 0.621371;
+      return withUnit ? `${mi.toFixed(2)} mi` : mi.toFixed(2);
+    }
+    return withUnit ? `${Number(km).toFixed(2)} km` : Number(km).toFixed(2);
+  },
+
+  distUnit() {
+    return AppState.settings.units === 'imperial' ? 'mi' : 'km';
+  },
+
+  duration(seconds, includeHoursAlways = false) {
+    if (!seconds || isNaN(seconds) || seconds < 0) seconds = 0;
+    const s = Math.floor(seconds);
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const secs = s % 60;
+    const pad = (n) => String(n).padStart(2, '0');
+    if (hrs > 0 || includeHoursAlways) {
+      return `${pad(hrs)}:${pad(mins)}:${pad(secs)}`;
+    }
+    return `${pad(mins)}:${pad(secs)}`;
+  },
+
+  pace(secPerKm, sport = 'running') {
+    if (!secPerKm || isNaN(secPerKm) || secPerKm <= 0 || !isFinite(secPerKm)) {
+      return sport === 'cycling' ? '--.-' : '--:--';
+    }
+    if (sport === 'cycling') {
+      // Speed in km/h or mph
+      const kmh = (3600 / secPerKm);
+      if (AppState.settings.units === 'imperial') {
+        const mph = kmh * 0.621371;
+        return `${mph.toFixed(1)} mph`;
+      }
+      return `${kmh.toFixed(1)} km/h`;
+    }
+    if (sport === 'swimming') {
+      // Swimming pace per 100m
+      const secPer100m = secPerKm / 10;
+      const mins = Math.floor(secPer100m / 60);
+      const secs = Math.floor(secPer100m % 60);
+      return `${mins}:${String(secs).padStart(2, '0')} /100m`;
+    }
+    // Running pace
+    let s = secPerKm;
+    let unitLabel = '/km';
+    if (AppState.settings.units === 'imperial') {
+      s = secPerKm / 0.621371;
+      unitLabel = '/mi';
+    }
+    const mins = Math.floor(s / 60);
+    const secs = Math.floor(s % 60);
+    return `${mins}:${String(secs).padStart(2, '0')} ${unitLabel}`;
+  },
+
+  elevation(meters) {
+    if (meters == null || isNaN(meters)) return '+0 m';
+    if (AppState.settings.units === 'imperial') {
+      const feet = Math.round(meters * 3.28084);
+      return `+${feet} ft`;
+    }
+    return `+${Math.round(meters)} m`;
+  },
+
+  date(iso) {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  },
+
+  time(iso) {
+    const d = new Date(iso);
+    return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  }
+};
+
+// Haversine GPS Distance Calculation
+function calcHaversine(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // in km
+}
+
+// Toast Notifications
+function showToast(message, type = 'info') {
+  const container = document.getElementById('toast-container');
+  if (!container) return;
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+    <span>${message}</span>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transform = 'translateY(-10px)';
+    toast.style.transition = 'all 0.25s ease';
+    setTimeout(() => toast.remove(), 250);
+  }, 3200);
+}
+
+// Router Navigation Engine
+const Router = {
+  navigate(screenId, params = {}) {
+    AppState.currentScreen = screenId;
+    if (params.detailId) AppState.activeDetailId = params.detailId;
+
+    // Update screen visibility
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(`screen-${screenId}`);
+    if (target) {
+      target.classList.add('active');
+      window.scrollTo(0, 0);
+    }
+
+    // Update nav states
+    document.querySelectorAll('.nav-item').forEach(b => {
+      const match = b.getAttribute('onclick')?.includes(`'${screenId}'`);
+      b.classList.toggle('active', !!match);
+    });
+    document.querySelectorAll('.mobile-nav-btn').forEach(b => {
+      const match = b.getAttribute('onclick')?.includes(`'${screenId}'`);
+      b.classList.toggle('active', !!match);
+    });
+
+    // Render screen contents
+    switch (screenId) {
+      case 'home': renderHomeScreen(); break;
+      case 'record': renderRecordScreen(); break;
+      case 'activities': renderActivitiesScreen(); break;
+      case 'activity-detail': renderActivityDetailScreen(AppState.activeDetailId); break;
+      case 'insights': renderInsightsScreen(); break;
+      case 'goals': renderGoalsScreen(); break;
+      case 'plans': renderPlansScreen(); break;
+      case 'records': renderRecordsScreen(); break;
+      case 'settings': renderSettingsScreen(); break;
+      case 'privacy': renderPrivacyScreen(); break;
+    }
+  }
+};
+
+// ==========================================
+// Route Visualizer & SVG Rendering
+// ==========================================
+const RouteVisualizer = {
+  renderSVG(points, width = 400, height = 240, interactive = false) {
+    if (!points || points.length < 2) {
+      return `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;gap:8px;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+          <span>No GPS route coordinates recorded</span>
+        </div>
+      `;
+    }
+
+    let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+    for (const p of points) {
+      if (p.lat < minLat) minLat = p.lat;
+      if (p.lat > maxLat) maxLat = p.lat;
+      if (p.lon < minLon) minLon = p.lon;
+      if (p.lon > maxLon) maxLon = p.lon;
+    }
+
+    const pad = 24;
+    const drawW = width - pad * 2;
+    const drawH = height - pad * 2;
+    const latSpan = (maxLat - minLat) || 0.0001;
+    const lonSpan = (maxLon - minLon) || 0.0001;
+
+    // Preserve aspect ratio
+    const scale = Math.min(drawW / lonSpan, drawH / latSpan);
+    const offsetX = pad + (drawW - lonSpan * scale) / 2;
+    const offsetY = pad + (drawH - latSpan * scale) / 2;
+
+    const coords = points.map(p => {
+      const x = offsetX + (p.lon - minLon) * scale;
+      const y = height - (offsetY + (p.lat - minLat) * scale); // Invert latitude for SVG
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    });
+
+    const pathData = 'M ' + coords.join(' L ');
+    const startPt = coords[0].split(',');
+    const endPt = coords[coords.length - 1].split(',');
+
+    return `
+      <svg width="100%" height="100%" viewBox="0 0 ${width} ${height}" style="overflow:visible;">
+        <defs>
+          <linearGradient id="routeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="var(--blue)" />
+            <stop offset="100%" stop-color="var(--primary)" />
+          </linearGradient>
+          <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="rgba(184,255,61,0.4)"/>
+          </filter>
+        </defs>
+        <!-- Background Route Glow Path -->
+        <path d="${pathData}" fill="none" stroke="var(--primary-glow)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Main Route Path -->
+        <path d="${pathData}" fill="none" stroke="url(#routeGrad)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
+        <!-- Start Point Marker -->
+        <circle cx="${startPt[0]}" cy="${startPt[1]}" r="6" fill="#43e889" stroke="#08090b" stroke-width="2"/>
+        <!-- End Point Marker -->
+        <circle cx="${endPt[0]}" cy="${endPt[1]}" r="7" fill="var(--primary)" stroke="#08090b" stroke-width="2"/>
+        <circle cx="${endPt[0]}" cy="${endPt[1]}" r="12" fill="none" stroke="var(--primary)" stroke-width="1.5" opacity="0.6">
+          <animate attributeName="r" values="7;14;7" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.8;0;0.8" dur="2s" repeatCount="indefinite"/>
+        </circle>
+      </svg>
+    `;
+  }
+};
+
+// ==========================================
+// SVG Charting Engine (Pure CSS/SVG, Zero CDN)
+// ==========================================
+const ChartEngine = {
+  renderBars(items, width = 360, height = 140) {
+    if (!items || !items.length) {
+      return '<div style="color:var(--text-muted);font-size:12px;padding:20px 0;text-align:center;">No recent data for this chart</div>';
+    }
+    const maxVal = Math.max(...items.map(i => i.value), 1);
+    const padX = 30;
+    const padY = 20;
+    const barW = Math.max(12, Math.min(28, (width - padX * 2) / items.length - 8));
+    const step = (width - padX * 2) / items.length;
+
+    let bars = '';
+    items.forEach((item, idx) => {
+      const x = padX + idx * step + (step - barW) / 2;
+      const h = ((item.value / maxVal) * (height - padY * 2));
+      const y = height - padY - h;
+      const activeColor = item.value > 0 ? 'var(--primary)' : 'var(--surface-3)';
+
+      bars += `
+        <rect x="${x}" y="${y}" width="${barW}" height="${Math.max(3, h)}" rx="4" fill="${activeColor}"/>
+        <text x="${x + barW / 2}" y="${height - 4}" text-anchor="middle" font-size="10" fill="var(--text-muted)" font-weight="600">${item.label}</text>
+        ${item.value > 0 ? `<text x="${x + barW / 2}" y="${Math.max(12, y - 4)}" text-anchor="middle" font-size="10" font-family="var(--font-mono)" fill="var(--text-secondary)">${item.value}</text>` : ''}
+      `;
+    });
+
+    return `
+      <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow:visible;">
+        <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="var(--border)" stroke-width="1"/>
+        ${bars}
+      </svg>
+    `;
+  },
+
+  renderArea(items, width = 360, height = 140, color = 'var(--primary)') {
+    if (!items || items.length < 2) {
+      return '<div style="color:var(--text-muted);font-size:12px;padding:20px 0;text-align:center;">Insufficient data to plot trend</div>';
+    }
+    const maxVal = Math.max(...items.map(i => i.value), 1);
+    const minVal = Math.min(...items.map(i => i.value), 0);
+    const valRange = (maxVal - minVal) || 1;
+    const padX = 20;
+    const padY = 24;
+    const step = (width - padX * 2) / (items.length - 1);
+
+    const points = items.map((it, idx) => {
+      const x = padX + idx * step;
+      const y = height - padY - ((it.value - minVal) / valRange) * (height - padY * 2);
+      return { x, y, label: it.label, val: it.value };
+    });
+
+    const pathLine = 'M ' + points.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L ');
+    const pathArea = `${pathLine} L ${points[points.length-1].x},${height - padY} L ${points[0].x},${height - padY} Z`;
+
+    let dots = '';
+    points.forEach(p => {
+      dots += `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5" fill="${color}" stroke="var(--surface)" stroke-width="2"/>`;
+    });
+
+    return `
+      <svg width="100%" height="${height}" viewBox="0 0 ${width} ${height}" style="overflow:visible;">
+        <defs>
+          <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="${color}" stop-opacity="0.3"/>
+            <stop offset="100%" stop-color="${color}" stop-opacity="0.0"/>
+          </linearGradient>
+        </defs>
+        <line x1="${padX}" y1="${height - padY}" x2="${width - padX}" y2="${height - padY}" stroke="var(--border)" stroke-width="1"/>
+        <path d="${pathArea}" fill="url(#areaGrad)"/>
+        <path d="${pathLine}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+        ${dots}
+      </svg>
+    `;
+  }
+};
+
+// ==========================================
+// Personal Records (PR) Engine
+// ==========================================
+const PRManager = {
+  checkNewPRs(activity) {
+    if (!activity || !activity.distance) return [];
+    const newPRs = [];
+    const prs = AppState.prs || {};
+    const km = activity.distance;
+    const sec = activity.duration;
+    const pace = activity.averagePace;
+
+    if (activity.type === 'running') {
+      // 1K PR (if ran at least 1km)
+      if (km >= 1.0) {
+        const est1K = (pace * 1.0);
+        if (!prs.run1K || est1K < prs.run1K.time) {
+          newPRs.push({ key: 'run1K', title: 'Fastest 1K', prev: prs.run1K?.time, current: est1K, unit: 'time' });
+          prs.run1K = { time: est1K, date: activity.startTime, activityId: activity.id };
+        }
+      }
+      // 5K PR
+      if (km >= 5.0) {
+        const est5K = (pace * 5.0);
+        if (!prs.run5K || est5K < prs.run5K.time) {
+          newPRs.push({ key: 'run5K', title: 'Fastest 5K', prev: prs.run5K?.time, current: est5K, unit: 'time' });
+          prs.run5K = { time: est5K, date: activity.startTime, activityId: activity.id };
+        }
+      }
+      // 10K PR
+      if (km >= 10.0) {
+        const est10K = (pace * 10.0);
+        if (!prs.run10K || est10K < prs.run10K.time) {
+          newPRs.push({ key: 'run10K', title: 'Fastest 10K', prev: prs.run10K?.time, current: est10K, unit: 'time' });
+          prs.run10K = { time: est10K, date: activity.startTime, activityId: activity.id };
+        }
+      }
+      // Longest Run
+      if (!prs.runLongest || km > prs.runLongest.distance) {
+        newPRs.push({ key: 'runLongest', title: 'Longest Run', prev: prs.runLongest?.distance, current: km, unit: 'dist' });
+        prs.runLongest = { distance: km, date: activity.startTime, activityId: activity.id };
+      }
+    } else if (activity.type === 'cycling') {
+      if (!prs.rideLongest || km > prs.rideLongest.distance) {
+        newPRs.push({ key: 'rideLongest', title: 'Longest Ride', prev: prs.rideLongest?.distance, current: km, unit: 'dist' });
+        prs.rideLongest = { distance: km, date: activity.startTime, activityId: activity.id };
+      }
+      const speed = km / (sec / 3600);
+      if (!prs.rideSpeed || speed > prs.rideSpeed.speed) {
+        newPRs.push({ key: 'rideSpeed', title: 'Fastest Speed', prev: prs.rideSpeed?.speed, current: speed, unit: 'speed' });
+        prs.rideSpeed = { speed: speed, date: activity.startTime, activityId: activity.id };
+      }
+    } else if (activity.type === 'swimming') {
+      if (!prs.swimLongest || km > prs.swimLongest.distance) {
+        newPRs.push({ key: 'swimLongest', title: 'Longest Swim', prev: prs.swimLongest?.distance, current: km, unit: 'dist' });
+        prs.swimLongest = { distance: km, date: activity.startTime, activityId: activity.id };
+      }
+    }
+
+    if (newPRs.length > 0) {
+      AppState.prs = prs;
+      DB.put('personalRecords', { id: 'user_prs', records: prs });
+    }
+    return newPRs;
+  }
+};
+
+// ==========================================
+// Real-Time Activity Recorder Engine
+// ==========================================
+const Recorder = {
+  sport: 'running', // 'running' | 'cycling' | 'swimming'
+  state: 'idle', // 'idle' | 'searching' | 'ready' | 'recording' | 'paused' | 'completing'
+  watchId: null,
+  wakeLock: null,
+  timerInterval: null,
+
+  // Live Metrics
+  startTime: null,
+  elapsedSeconds: 0,
+  distanceKm: 0,
+  currentPaceSec: 0,
+  averagePaceSec: 0,
+  elevationGain: 0,
+  lastAltitude: null,
+  calories: 0,
+  cadence: 168,
+  heartRate: 142,
+
+  // Route & Splits
+  routePoints: [],
+  splits: [],
+  lastSplitKm: 0,
+  lastSplitTime: 0,
+  lastSplitElevation: 0,
+
+  // Swimming Specifics
+  swimLaps: 0,
+  poolLengthM: 25,
+  swimStroke: 'Freestyle',
+  swimRestSec: 0,
+
+  // Settings
+  targetPaceSec: 300, // 5:00/km
+  autoPaused: false,
+  gpsAccuracy: null,
+
+  initSport(sport) {
+    this.sport = sport || AppState.settings.defaultSport || 'running';
+    this.resetState();
+    this.checkGPS();
+  },
+
+  resetState() {
+    this.stopGPS();
+    clearInterval(this.timerInterval);
+    this.releaseWakeLock();
+    this.state = 'idle';
+    this.elapsedSeconds = 0;
+    this.distanceKm = 0;
+    this.currentPaceSec = 0;
+    this.averagePaceSec = 0;
+    this.elevationGain = 0;
+    this.lastAltitude = null;
+    this.calories = 0;
+    this.routePoints = [];
+    this.splits = [];
+    this.lastSplitKm = 0;
+    this.lastSplitTime = 0;
+    this.lastSplitElevation = 0;
+    this.swimLaps = 0;
+    this.autoPaused = false;
+    this.gpsAccuracy = null;
+  },
+
+  checkGPS() {
+    if (this.sport === 'swimming') {
+      this.state = 'ready';
+      this.updateUI();
+      return;
+    }
+
+    if (!('geolocation' in navigator)) {
+      this.state = 'ready'; // Manual fallback
+      this.updateUI();
+      return;
+    }
+
+    this.state = 'searching';
+    this.updateUI();
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        this.gpsAccuracy = Math.round(pos.coords.accuracy);
+        this.state = 'ready';
+        this.updateUI();
+      },
+      (err) => {
+        console.warn('GPS initial check warning:', err.message);
+        this.state = 'ready'; // Still allow recording
+        this.updateUI();
+      },
+      { enableHighAccuracy: true, timeout: 6000 }
+    );
+  },
+
+  start() {
+    if (this.state === 'recording') return;
+    this.state = 'recording';
+    this.startTime = new Date().toISOString();
+    this.requestWakeLock();
+    AudioCoach.haptic([100, 50, 100]);
+    AudioCoach.speak(`Starting ${this.sport}. Train with clarity.`);
+
+    // Start GPS Watch
+    if (this.sport !== 'swimming' && 'geolocation' in navigator) {
+      try {
+        this.watchId = navigator.geolocation.watchPosition(
+          (pos) => this.onLocationUpdate(pos),
+          (err) => console.warn('GPS watch error:', err.message),
+          { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 }
+        );
+      } catch (e) {
+        console.warn('Geolocation failed to watch:', e);
+      }
+    }
+
+    // Start 1-second Tick Interval
+    this.timerInterval = setInterval(() => this.tick(), 1000);
+    this.updateUI();
+  },
+
+  tick() {
+    if (this.state !== 'recording' || this.autoPaused) return;
+    this.elapsedSeconds++;
+
+    // Calculate Average Pace
+    if (this.distanceKm > 0.05) {
+      this.averagePaceSec = Math.round(this.elapsedSeconds / this.distanceKm);
+      // Rough calorie approximation (MET calculation)
+      const met = this.sport === 'cycling' ? 7.5 : this.sport === 'swimming' ? 8.0 : 9.5;
+      this.calories = Math.round((met * 70 * (this.elapsedSeconds / 3600)));
+    }
+
+    // Check distance split (every 1 km)
+    if (this.distanceKm - this.lastSplitKm >= 1.0) {
+      this.recordSplit();
+    }
+
+    this.updateUI();
+  },
+
+  onLocationUpdate(pos) {
+    if (this.state !== 'recording') return;
+    const { latitude: lat, longitude: lon, altitude, accuracy, speed } = pos.coords;
+    this.gpsAccuracy = Math.round(accuracy);
+
+    // Reject erratic points with accuracy > 35m
+    if (accuracy > 35 && this.routePoints.length > 0) return;
+
+    // Auto-pause check (speed < 3 km/h = ~0.83 m/s)
+    if (AppState.settings.autoPause && speed != null && speed >= 0) {
+      const kmh = speed * 3.6;
+      if (kmh < AppState.settings.autoPauseSpeed && !this.autoPaused && this.elapsedSeconds > 10) {
+        this.autoPaused = true;
+        AudioCoach.haptic(50);
+        this.updateUI();
+        return;
+      } else if (kmh >= AppState.settings.autoPauseSpeed && this.autoPaused) {
+        this.autoPaused = false;
+        AudioCoach.haptic(80);
+        this.updateUI();
+      }
+    }
+
+    // Append route point & calculate distance
+    const point = { lat, lon, time: Date.now(), alt: altitude || 0 };
+    if (this.routePoints.length > 0) {
+      const prev = this.routePoints[this.routePoints.length - 1];
+      const deltaKm = calcHaversine(prev.lat, prev.lon, lat, lon);
+
+      // Sanity check: filter impossible teleportation jumps (>80km/h for run, >120km/h for bike)
+      const maxAllowedDelta = this.sport === 'cycling' ? 0.08 : 0.04;
+      if (deltaKm > 0.002 && deltaKm < maxAllowedDelta) {
+        this.distanceKm += deltaKm;
+        // Instant pace calculation from recent GPS interval
+        const timeDiffSec = (point.time - prev.time) / 1000;
+        if (timeDiffSec > 0) {
+          this.currentPaceSec = Math.round(timeDiffSec / deltaKm);
+        }
+      }
+
+      // Altitude gain
+      if (altitude && this.lastAltitude != null) {
+        const deltaAlt = altitude - this.lastAltitude;
+        if (deltaAlt > 1.5 && deltaAlt < 40) {
+          this.elevationGain += deltaAlt;
+        }
+      }
+    }
+
+    if (altitude != null) this.lastAltitude = altitude;
+    this.routePoints.push(point);
+    this.updateUI();
+  },
+
+  recordSplit() {
+    const splitIndex = Math.floor(this.distanceKm);
+    const splitDuration = this.elapsedSeconds - this.lastSplitTime;
+    const splitPace = splitDuration; // 1km in seconds
+    const elevationDelta = Math.round(this.elevationGain - this.lastSplitElevation);
+
+    this.splits.push({
+      km: splitIndex,
+      duration: splitDuration,
+      pace: splitPace,
+      elevationDelta: elevationDelta
+    });
+
+    this.lastSplitKm = splitIndex;
+    this.lastSplitTime = this.elapsedSeconds;
+    this.lastSplitElevation = this.elevationGain;
+
+    // Audio cue
+    const mins = Math.floor(splitPace / 60);
+    const secs = splitPace % 60;
+    AudioCoach.speak(`Kilometer ${splitIndex}. Split pace: ${mins} minutes ${secs} seconds.`);
+    AudioCoach.haptic([100, 100]);
+  },
+
+  addSwimLap() {
+    this.swimLaps++;
+    this.distanceKm = (this.swimLaps * this.poolLengthM) / 1000;
+    if (this.elapsedSeconds > 0) {
+      this.averagePaceSec = Math.round(this.elapsedSeconds / this.distanceKm);
+      this.calories = Math.round((8.0 * 70 * (this.elapsedSeconds / 3600)));
+    }
+    AudioCoach.haptic(60);
+    this.updateUI();
+  },
+
+  pause() {
+    if (this.state !== 'recording') return;
+    this.state = 'paused';
+    AudioCoach.haptic(100);
+    AudioCoach.speak('Activity paused.');
+    this.updateUI();
+  },
+
+  resume() {
+    if (this.state !== 'paused') return;
+    this.state = 'recording';
+    this.autoPaused = false;
+    AudioCoach.haptic(100);
+    AudioCoach.speak('Activity resumed.');
+    this.updateUI();
+  },
+
+  finishConfirm() {
+    if (this.elapsedSeconds < 10 && this.distanceKm < 0.05) {
+      if (confirm('Discard this short activity?')) {
+        this.resetState();
+        Router.navigate('home');
+      }
+      return;
+    }
+    this.pause();
+    this.state = 'completing';
+    this.updateUI();
+  },
+
+  discard() {
+    if (confirm('Are you sure you want to discard this recording?')) {
+      this.resetState();
+      Router.navigate('home');
+      showToast('Activity discarded');
+    }
+  },
+
+  async saveActivity(feeling, rpe, notes) {
+    const activity = {
+      id: 'act_' + Date.now(),
+      type: this.sport,
+      startTime: this.startTime || new Date().toISOString(),
+      endTime: new Date().toISOString(),
+      duration: Math.max(1, this.elapsedSeconds),
+      distance: Number(this.distanceKm.toFixed(3)),
+      pace: this.currentPaceSec,
+      averagePace: this.averagePaceSec || (this.distanceKm > 0 ? Math.round(this.elapsedSeconds / this.distanceKm) : 0),
+      speed: this.distanceKm > 0 ? Number((this.distanceKm / (this.elapsedSeconds / 3600)).toFixed(2)) : 0,
+      elevationGain: Math.round(this.elevationGain),
+      calories: this.calories || 120,
+      routePoints: this.routePoints,
+      splits: this.splits,
+      heartRate: this.heartRate,
+      cadence: this.cadence,
+      feeling: feeling || '🙂',
+      rpe: Number(rpe) || 6,
+      notes: notes || '',
+      createdAt: new Date().toISOString()
+    };
+
+    // Save to IndexedDB
+    await DB.put('activities', activity);
+    AppState.activities.unshift(activity);
+
+    // Check PRs
+    const newPRs = PRManager.checkNewPRs(activity);
+
+    // Clean up
+    this.resetState();
+    showToast('Activity saved successfully!');
+
+    // Navigate to activity detail
+    Router.navigate('activity-detail', { detailId: activity.id });
+
+    // Show PR modal celebration if PR achieved
+    if (newPRs.length > 0) {
+      setTimeout(() => {
+        showPRModal(newPRs[0]);
+      }, 400);
+    }
+  },
+
+  stopGPS() {
+    if (this.watchId != null && 'geolocation' in navigator) {
+      navigator.geolocation.clearWatch(this.watchId);
+      this.watchId = null;
+    }
+  },
+
+  async requestWakeLock() {
+    if ('wakeLock' in navigator) {
+      try {
+        this.wakeLock = await navigator.wakeLock.request('screen');
+      } catch (err) {}
+    }
+  },
+
+  releaseWakeLock() {
+    if (this.wakeLock) {
+      this.wakeLock.release().catch(() => {});
+      this.wakeLock = null;
+    }
+  },
+
+  updateUI() {
+    if (AppState.currentScreen === 'record') {
+      renderRecordScreen();
+    }
+  }
+};
+
+// ==========================================
+// Screen Renderers
+// ==========================================
+
+// 1. HOME SCREEN
+function renderHomeScreen() {
+  const container = document.getElementById('screen-home');
+  if (!container) return;
+
+  const acts = AppState.activities;
+  const now = new Date();
+  
+  // Weekly Calculations (Monday - Sunday)
+  const startOfWeek = new Date(now);
+  const day = startOfWeek.getDay() || 7;
+  startOfWeek.setHours(0, 0, 0, 0);
+  startOfWeek.setDate(startOfWeek.getDate() - day + 1);
+
+  const weekActs = acts.filter(a => new Date(a.startTime) >= startOfWeek);
+  const weekDistKm = weekActs.reduce((acc, a) => acc + (a.distance || 0), 0);
+  const weekDurationSec = weekActs.reduce((acc, a) => acc + (a.duration || 0), 0);
+  const weeklyTarget = AppState.settings.weeklyGoal || 25;
+  const pct = Math.min(100, Math.round((weekDistKm / weeklyTarget) * 100));
+
+  // Current Streak Calculation
+  let streak = 0;
+  const uniqueDays = new Set(acts.map(a => new Date(a.startTime).toDateString()));
+  let checkDate = new Date(now);
+  while (uniqueDays.has(checkDate.toDateString())) {
+    streak++;
+    checkDate.setDate(checkDate.getDate() - 1);
+  }
+
+  // Performance Stats
+  const runActs = acts.filter(a => a.type === 'running' && a.averagePace > 0);
+  const avgPaceSec = runActs.length ? Math.round(runActs.reduce((s, a) => s + a.averagePace, 0) / runActs.length) : null;
+  const bestPaceSec = runActs.length ? Math.min(...runActs.map(a => a.averagePace)) : null;
+  const longestAct = acts.length ? acts.reduce((prev, curr) => (curr.distance > prev.distance) ? curr : prev) : null;
+  const totalElevation = acts.reduce((s, a) => s + (a.elevationGain || 0), 0);
+
+  // Dynamic Coaching Insight
+  let insightText = "Consistency is the foundation of endurance. Track your next session to build your baseline.";
+  if (acts.length >= 3) {
+    if (pct >= 80) {
+      insightText = "You have completed " + pct + "% of your weekly goal. Strong consistency this week.";
+    } else if (pct < 40 && (now.getDay() >= 4)) {
+      insightText = "You are at " + pct + "% of your weekly goal. One more easy recovery session would put you closer to target.";
+    } else if (weekDistKm > weeklyTarget * 1.2) {
+      insightText = "Your weekly volume is 20% higher than your target baseline. Consider keeping tomorrow easy.";
+    } else {
+      insightText = "Pace stability is solid. Remember that recovery is an active part of progression.";
+    }
+  }
+
+  // Recent 3 activities
+  const recentActs = acts.slice(0, 4);
+
+  let html = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Today's Overview</h1>
+        <div class="page-subtitle">${now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })} · StrideOS Active</div>
+      </div>
+      <button class="btn btn-primary" onclick="Router.navigate('record')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Start Recording</span>
+      </button>
+    </div>
+
+    <!-- Today's Planned Workout or Rest -->
+    <div class="card" style="border-left: 4px solid var(--primary); background: linear-gradient(90deg, rgba(184,255,61,0.04), transparent);">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div class="section-title" style="margin-bottom:4px;color:var(--primary);">TODAY'S WORKOUT</div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-0.4px;">Easy Aerobic Run</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">5.0 km · 28 min · Rhythmic conversation pace</div>
+        </div>
+        <div style="display:flex;gap:10px;">
+          <button class="btn btn-primary btn-sm" onclick="Recorder.initSport('running'); Router.navigate('record');">Start Workout</button>
+          <button class="btn btn-secondary btn-sm" onclick="Router.navigate('plans')">View Plan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Progress Card -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:8px;">
+        <div>
+          <div class="section-title">WEEKLY PROGRESS</div>
+          <div style="font-size:32px;font-weight:900;font-family:var(--font-mono);line-height:1;">
+            ${Format.distance(weekDistKm, false)} <span style="font-size:16px;color:var(--text-secondary);font-family:var(--font-sans);">/ ${Format.distance(weeklyTarget)}</span>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:22px;font-weight:900;color:var(--primary);font-family:var(--font-mono);">${pct}%</div>
+          <div style="font-size:12px;color:var(--text-muted);">${weekActs.length} session${weekActs.length === 1 ? '' : 's'} · ${Format.duration(weekDurationSec)}</div>
+        </div>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width:${pct}%;"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);font-weight:600;margin-top:6px;">
+        <span>Mon</span>
+        <span>Goal: ${weeklyTarget} ${Format.distUnit()}</span>
+        <span>Sun</span>
+      </div>
+    </div>
+
+    <!-- Streak & Coaching Insight Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:14px;margin-bottom:18px;">
+      <div class="card" style="margin-bottom:0;">
+        <div class="section-title">CURRENT STREAK</div>
+        <div style="display:flex;align-items:center;gap:12px;margin:8px 0;">
+          <span style="font-size:32px;">🔥</span>
+          <div>
+            <div style="font-size:28px;font-weight:900;font-family:var(--font-mono);">${streak} <span style="font-size:14px;color:var(--text-secondary);font-family:var(--font-sans);">DAYS</span></div>
+            <div style="font-size:12px;color:var(--text-secondary);">Consecutive days of logged training</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-bottom:0;">
+        <div class="section-title">COACHING INSIGHT</div>
+        <p style="font-size:13.5px;color:var(--text);line-height:1.6;margin-top:6px;">
+          « ${insightText} »
+        </p>
+      </div>
+    </div>
+
+    <!-- Performance Cards -->
+    <div class="section-title">PERFORMANCE BASELINE</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Avg Pace (Run)</div>
+        <div class="stat-value">${Format.pace(avgPaceSec, 'running')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Best Pace</div>
+        <div class="stat-value" style="color:var(--primary);">${Format.pace(bestPaceSec, 'running')}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Estimated 5K</div>
+        <div class="stat-value">${bestPaceSec ? Format.duration(bestPaceSec * 5) : '--:--'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Longest Activity</div>
+        <div class="stat-value">${longestAct ? Format.distance(longestAct.distance) : '0.0 km'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Elevation Gain</div>
+        <div class="stat-value">${Format.elevation(totalElevation)}</div>
+      </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:24px 0 12px;">
+      <div class="section-title" style="margin-bottom:0;">RECENT ACTIVITIES</div>
+      <button class="btn btn-secondary btn-sm" onclick="Router.navigate('activities')">View All</button>
+    </div>
+  `;
+
+  if (recentActs.length === 0) {
+    html += `
+      <div class="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <div class="empty-state-title">Your training dashboard is ready</div>
+        <div class="empty-state-text">
+          Record your first activity to unlock weekly trends, personal records, training load, and pace analysis.
+        </div>
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="Router.navigate('record')">Record First Activity</button>
+          <button class="btn btn-secondary" onclick="seedDemoData()">Load Sample Data</button>
+        </div>
+      </div>
+    `;
+  } else {
+    recentActs.forEach(act => {
+      const sportEmoji = act.type === 'cycling' ? '🚴' : act.type === 'swimming' ? '🏊' : '🏃';
+      const paceText = Format.pace(act.averagePace, act.type);
+      html += `
+        <div class="activity-card" onclick="Router.navigate('activity-detail', { detailId: '${act.id}' })">
+          <div class="sport-icon-box" style="font-size:20px;">${sportEmoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:15px;display:flex;align-items:center;gap:8px;">
+              <span>${act.type.toUpperCase()}</span>
+              <span style="font-size:12px;color:var(--text-muted);font-weight:500;">${Format.date(act.startTime)}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">
+              ${Format.duration(act.duration)} · ${paceText} · ${Format.elevation(act.elevationGain)}
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:18px;font-weight:900;font-family:var(--font-mono);">${Format.distance(act.distance)}</div>
+            <div style="font-size:12px;">${act.feeling || '🙂'} RPE ${act.rpe || 6}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+// 2. RECORD SCREEN
+function renderRecordScreen() {
+  const container = document.getElementById('screen-record');
+  if (!container) return;
+
+  const r = Recorder;
+
+  // Screen state 1: Idle / Preparing to start
+  if (r.state === 'idle' || r.state === 'searching' || r.state === 'ready') {
+    let gpsStatusBadge = '';
+    if (r.sport === 'swimming') {
+      gpsStatusBadge = `<span style="background:var(--surface-3);color:var(--blue);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">🏊 POOL MODE (LAPS)</span>`;
+    } else if (r.state === 'searching') {
+      gpsStatusBadge = `<span style="background:rgba(255,179,71,0.15);color:var(--orange);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">📡 SEARCHING GPS...</span>`;
+    } else {
+      gpsStatusBadge = `<span style="background:rgba(67,232,137,0.15);color:var(--green);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">● GPS READY (±${r.gpsAccuracy || 5}m)</span>`;
+    }
+
+    container.innerHTML = `
+      <div style="max-width:540px;margin:0 auto;">
+        <div class="page-header" style="margin-bottom:18px;">
+          <div>
+            <h1 class="page-title">Record Activity</h1>
+            <div class="page-subtitle">Hardware GPS · Offline-First · Local</div>
+          </div>
+          ${gpsStatusBadge}
+        </div>
+
+        <!-- Sport Selector -->
+        <div style="display:flex;gap:10px;background:var(--surface-2);padding:6px;border-radius:var(--radius-md);margin-bottom:20px;">
+          <button class="btn btn-sm ${r.sport === 'running' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.initSport('running')">🏃 Run</button>
+          <button class="btn btn-sm ${r.sport === 'cycling' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.initSport('cycling')">🚴 Ride</button>
+          <button class="btn btn-sm ${r.sport === 'swimming' ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.initSport('swimming')">🏊 Swim</button>
+        </div>
+
+        <!-- Sport specific configuration -->
+        ${r.sport === 'swimming' ? `
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label">Pool Length</label>
+              <div style="display:flex;gap:8px;">
+                <button class="btn btn-sm ${r.poolLengthM === 25 ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.poolLengthM = 25; Recorder.updateUI();">25 Meters</button>
+                <button class="btn btn-sm ${r.poolLengthM === 33 ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.poolLengthM = 33; Recorder.updateUI();">33.3 Meters</button>
+                <button class="btn btn-sm ${r.poolLengthM === 50 ? 'btn-primary' : 'btn-secondary'}" style="flex:1;" onclick="Recorder.poolLengthM = 50; Recorder.updateUI();">50 Meters</button>
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Primary Stroke</label>
+              <select class="form-select" onchange="Recorder.swimStroke = this.value">
+                <option value="Freestyle">Freestyle</option>
+                <option value="Breaststroke">Breaststroke</option>
+                <option value="Backstroke">Backstroke</option>
+                <option value="Butterfly">Butterfly</option>
+                <option value="Mixed">Mixed Medley</option>
+              </select>
+            </div>
+          </div>
+        ` : `
+          <!-- Target Pace Helper -->
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+              <span class="section-title" style="margin-bottom:0;">TARGET PACE ALERT</span>
+              <span style="font-family:var(--font-mono);font-weight:800;color:var(--primary);">${Format.pace(r.targetPaceSec, r.sport)}</span>
+            </div>
+            <input type="range" min="180" max="600" step="15" value="${r.targetPaceSec}" style="width:100%;accent-color:var(--primary);" oninput="Recorder.targetPaceSec = Number(this.value); Recorder.updateUI();">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px;">
+              <span>Fast (3:00)</span>
+              <span>Moderate (5:00)</span>
+              <span>Easy (10:00)</span>
+            </div>
+          </div>
+        `}
+
+        <!-- Start Button -->
+        <button class="record-btn-action btn-primary" style="width:100%;font-size:20px;height:70px;margin-top:10px;box-shadow:0 10px 30px rgba(184,255,61,0.25);" onclick="Recorder.start()">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>START ${r.sport.toUpperCase()}</span>
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // Screen state 2: Recording or Paused
+  if (r.state === 'recording' || r.state === 'paused') {
+    // Pace comparison indicator
+    let paceIndicator = '';
+    if (r.sport !== 'swimming' && r.currentPaceSec > 0) {
+      const diff = r.currentPaceSec - r.targetPaceSec;
+      if (Math.abs(diff) <= 15) {
+        paceIndicator = `<span style="color:var(--green);font-size:12px;font-weight:700;">🟢 On target</span>`;
+      } else if (diff > 15 && diff < 40) {
+        paceIndicator = `<span style="color:var(--orange);font-size:12px;font-weight:700;">🟡 Slightly slow (+${diff}s)</span>`;
+      } else if (diff >= 40) {
+        paceIndicator = `<span style="color:var(--red);font-size:12px;font-weight:700;">🔴 Significantly slow (+${diff}s)</span>`;
+      } else {
+        paceIndicator = `<span style="color:var(--blue);font-size:12px;font-weight:700;">⚡ Ahead of target (${diff}s)</span>`;
+      }
+    }
+
+    container.innerHTML = `
+      <div style="max-width:560px;margin:0 auto;">
+        <!-- Header Status -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+          <div style="font-weight:800;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--primary);display:flex;align-items:center;gap:6px;">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${r.state === 'paused' ? 'var(--orange)' : 'var(--primary)'};"></span>
+            <span>${r.sport.toUpperCase()} · ${r.state === 'paused' ? 'PAUSED' : (r.autoPaused ? 'AUTO-PAUSED' : 'RECORDING')}</span>
+          </div>
+          <div>${paceIndicator}</div>
+        </div>
+
+        <!-- Big Metric Banner -->
+        <div class="card" style="text-align:center;padding:28px 16px;background:var(--surface);">
+          <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--text-muted);text-transform:uppercase;">TOTAL DISTANCE</div>
+          <div class="record-big-stat" style="margin:4px 0;">
+            ${Format.distance(r.distanceKm, false)} <span style="font-size:24px;color:var(--text-secondary);font-family:var(--font-sans);">${Format.distUnit()}</span>
+          </div>
+          ${r.sport === 'swimming' ? `<div style="font-size:14px;color:var(--blue);font-weight:700;">${r.swimLaps} Laps (${r.poolLengthM}m) · ${r.swimStroke}</div>` : ''}
+        </div>
+
+        <!-- 4 Core Metrics Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Time</div>
+            <div class="stat-value">${Format.duration(r.elapsedSeconds)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Avg Pace</div>
+            <div class="stat-value">${Format.pace(r.averagePaceSec, r.sport)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Current Pace</div>
+            <div class="stat-value">${Format.pace(r.currentPaceSec, r.sport)}</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Elevation Gain</div>
+            <div class="stat-value">${Format.elevation(r.elevationGain)}</div>
+          </div>
+        </div>
+
+        <!-- Swimming Lap Increment Button -->
+        ${r.sport === 'swimming' ? `
+          <button class="btn btn-secondary" style="width:100%;height:54px;font-size:16px;font-weight:800;margin-bottom:16px;border-color:var(--blue);color:var(--blue);" onclick="Recorder.addSwimLap()">
+            + LOG LAP (${r.poolLengthM}m)
+          </button>
+        ` : `
+          <!-- Live Route Visualizer -->
+          <div class="route-visualizer" style="margin-bottom:16px;">
+            ${RouteVisualizer.renderSVG(r.routePoints, 480, 240)}
+          </div>
+        `}
+
+        <!-- Recording Action Controls -->
+        <div class="record-controls">
+          ${r.state === 'recording' ? `
+            <button class="btn btn-secondary record-btn-action" onclick="Recorder.pause()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              <span>Pause</span>
+            </button>
+            <button class="btn btn-primary record-btn-action" onclick="Recorder.finishConfirm()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Finish</span>
+            </button>
+          ` : `
+            <button class="btn btn-primary record-btn-action" onclick="Recorder.resume()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <span>Resume</span>
+            </button>
+            <button class="btn btn-danger record-btn-action" onclick="Recorder.finishConfirm()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>Finish</span>
+            </button>
+          `}
+        </div>
+
+        <div style="text-align:center;margin-top:14px;">
+          <button class="btn btn-sm btn-secondary" style="color:var(--text-muted);" onclick="Recorder.discard()">Discard Activity</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  // Screen state 3: Completing & Saving Activity
+  if (r.state === 'completing') {
+    container.innerHTML = `
+      <div style="max-width:540px;margin:0 auto;">
+        <div class="card" style="text-align:center;border-color:var(--primary);margin-bottom:20px;">
+          <div style="color:var(--primary);font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;">ACTIVITY COMPLETE ✓</div>
+          <div style="font-size:42px;font-weight:900;font-family:var(--font-mono);margin:6px 0;">${Format.distance(r.distanceKm)}</div>
+          <div style="font-size:14px;color:var(--text-secondary);">
+            ${Format.duration(r.elapsedSeconds)} · ${Format.pace(r.averagePaceSec, r.sport)} avg · ${Format.elevation(r.elevationGain)}
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="form-group">
+            <label class="form-label">How did it feel?</label>
+            <div style="display:flex;justify-content:space-between;gap:8px;" id="feelings-group">
+              <button class="btn btn-secondary feel-btn" data-feel="😫" onclick="selectFeeling(this, '😫')">😫</button>
+              <button class="btn btn-secondary feel-btn" data-feel="😕" onclick="selectFeeling(this, '😕')">😕</button>
+              <button class="btn btn-secondary feel-btn" data-feel="😐" onclick="selectFeeling(this, '😐')">😐</button>
+              <button class="btn btn-primary feel-btn" data-feel="🙂" onclick="selectFeeling(this, '🙂')">🙂</button>
+              <button class="btn btn-secondary feel-btn" data-feel="🔥" onclick="selectFeeling(this, '🔥')">🔥</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div style="display:flex;justify-content:space-between;">
+              <label class="form-label">Rate of Perceived Exertion (RPE)</label>
+              <span id="rpe-label" style="font-weight:800;color:var(--primary);">7 / 10 (Hard)</span>
+            </div>
+            <input type="range" id="rpe-input" min="1" max="10" value="7" style="width:100%;accent-color:var(--primary);" oninput="updateRPELabel(this.value)">
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Notes</label>
+            <textarea id="activity-notes" class="form-textarea" rows="3" placeholder="Felt strong after 3km, steady cadence throughout..."></textarea>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:16px;">
+          <button class="btn btn-secondary" style="flex:1;" onclick="Recorder.discard()">Discard</button>
+          <button class="btn btn-primary" style="flex:2;" onclick="saveCurrentActivity()">Save Activity</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+let selectedFeeling = '🙂';
+function selectFeeling(el, val) {
+  selectedFeeling = val;
+  document.querySelectorAll('.feel-btn').forEach(b => {
+    b.className = 'btn btn-secondary feel-btn';
+  });
+  el.className = 'btn btn-primary feel-btn';
+}
+
+function updateRPELabel(val) {
+  const lbl = document.getElementById('rpe-label');
+  const labels = ['', 'Very Light', 'Light', 'Moderate', 'Somewhat Hard', 'Comfortably Hard', 'Hard', 'Very Hard', 'Extremely Hard', 'Maximum Effort'];
+  if (lbl) lbl.textContent = `${val} / 10 (${labels[val] || ''})`;
+}
+
+function saveCurrentActivity() {
+  const rpe = document.getElementById('rpe-input')?.value || 7;
+  const notes = document.getElementById('activity-notes')?.value || '';
+  Recorder.saveActivity(selectedFeeling, rpe, notes);
+}
+
+// 3. ACTIVITIES HISTORY SCREEN
+let activityFilter = 'all';
+let activitySort = 'newest';
+let activitySearchQuery = '';
+
+function renderActivitiesScreen() {
+  const container = document.getElementById('screen-activities');
+  if (!container) return;
+
+  let list = [...AppState.activities];
+
+  // Sport Filter
+  if (activityFilter !== 'all') {
+    list = list.filter(a => a.type === activityFilter);
+  }
+
+  // Search Filter
+  if (activitySearchQuery.trim()) {
+    const q = activitySearchQuery.toLowerCase();
+    list = list.filter(a => 
+      a.type.toLowerCase().includes(q) ||
+      (a.notes && a.notes.toLowerCase().includes(q)) ||
+      Format.date(a.startTime).toLowerCase().includes(q)
+    );
+  }
+
+  // Sort Filter
+  if (activitySort === 'newest') list.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+  else if (activitySort === 'oldest') list.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  else if (activitySort === 'longest') list.sort((a, b) => b.distance - a.distance);
+  else if (activitySort === 'fastest') list.sort((a, b) => (a.averagePace || 9999) - (b.averagePace || 9999));
+
+  let html = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Activity History</h1>
+        <div class="page-subtitle">${list.length} total logged activities</div>
+      </div>
+      <button class="btn btn-primary" onclick="Router.navigate('record')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Record</span>
+      </button>
+    </div>
+
+    <!-- Filters & Search Toolbar -->
+    <div class="card" style="padding:14px;margin-bottom:18px;">
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;">
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm ${activityFilter === 'all' ? 'btn-primary' : 'btn-secondary'}" onclick="activityFilter='all'; renderActivitiesScreen();">All</button>
+          <button class="btn btn-sm ${activityFilter === 'running' ? 'btn-primary' : 'btn-secondary'}" onclick="activityFilter='running'; renderActivitiesScreen();">🏃 Run</button>
+          <button class="btn btn-sm ${activityFilter === 'cycling' ? 'btn-primary' : 'btn-secondary'}" onclick="activityFilter='cycling'; renderActivitiesScreen();">🚴 Ride</button>
+          <button class="btn btn-sm ${activityFilter === 'swimming' ? 'btn-primary' : 'btn-secondary'}" onclick="activityFilter='swimming'; renderActivitiesScreen();">🏊 Swim</button>
+        </div>
+
+        <div style="display:flex;gap:8px;flex:1;min-width:260px;justify-content:flex-end;">
+          <input type="text" class="form-input" style="max-width:200px;padding:6px 10px;font-size:13px;" placeholder="Search activities..." value="${activitySearchQuery}" oninput="activitySearchQuery=this.value; renderActivitiesScreen();">
+          <select class="form-select" style="max-width:140px;padding:6px 10px;font-size:13px;" onchange="activitySort=this.value; renderActivitiesScreen();">
+            <option value="newest" ${activitySort==='newest'?'selected':''}>Newest First</option>
+            <option value="oldest" ${activitySort==='oldest'?'selected':''}>Oldest First</option>
+            <option value="longest" ${activitySort==='longest'?'selected':''}>Longest Dist</option>
+            <option value="fastest" ${activitySort==='fastest'?'selected':''}>Fastest Pace</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  `;
+
+  if (list.length === 0) {
+    html += `
+      <div class="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <div class="empty-state-title">No matching activities found</div>
+        <div class="empty-state-text">Try resetting your filter or recording a new session.</div>
+        <button class="btn btn-secondary btn-sm" onclick="activityFilter='all'; activitySearchQuery=''; renderActivitiesScreen();">Reset Filters</button>
+      </div>
+    `;
+  } else {
+    list.forEach(act => {
+      const sportEmoji = act.type === 'cycling' ? '🚴' : act.type === 'swimming' ? '🏊' : '🏃';
+      html += `
+        <div class="activity-card" onclick="Router.navigate('activity-detail', { detailId: '${act.id}' })">
+          <div class="sport-icon-box" style="font-size:22px;">${sportEmoji}</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-weight:800;font-size:16px;display:flex;align-items:center;gap:8px;">
+              <span>${act.type.toUpperCase()}</span>
+              <span style="font-size:12px;color:var(--text-muted);font-weight:500;">${Format.date(act.startTime)} · ${Format.time(act.startTime)}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">
+              ${Format.duration(act.duration)} · ${Format.pace(act.averagePace, act.type)} · ${Format.elevation(act.elevationGain)}
+            </div>
+            ${act.notes ? `<div style="font-size:12px;color:var(--text-muted);margin-top:3px;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">"${act.notes}"</div>` : ''}
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:20px;font-weight:900;font-family:var(--font-mono);">${Format.distance(act.distance)}</div>
+            <div style="font-size:12px;">${act.feeling || '🙂'} RPE ${act.rpe || 6}</div>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  container.innerHTML = html;
+}
+
+// 4. ACTIVITY DETAIL SCREEN
+function renderActivityDetailScreen(id) {
+  const container = document.getElementById('screen-activity-detail');
+  if (!container) return;
+
+  const act = AppState.activities.find(a => a.id === id);
+  if (!act) {
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-title">Activity not found</div>
+        <button class="btn btn-secondary btn-sm" onclick="Router.navigate('activities')">Back to Activities</button>
+      </div>
+    `;
+    return;
+  }
+
+  const sportEmoji = act.type === 'cycling' ? '🚴' : act.type === 'swimming' ? '🏊' : '🏃';
+
+  // Splits Analysis
+  let splitsHtml = '';
+  if (act.splits && act.splits.length > 0) {
+    const paces = act.splits.map(s => s.pace);
+    const minPace = Math.min(...paces);
+    const maxPace = Math.max(...paces);
+    
+    // Negative split check
+    let negativeSplitBadge = '';
+    if (act.splits.length >= 2) {
+      const half = Math.floor(act.splits.length / 2);
+      const firstHalfAvg = act.splits.slice(0, half).reduce((a, s) => a + s.pace, 0) / half;
+      const secondHalfAvg = act.splits.slice(half).reduce((a, s) => a + s.pace, 0) / (act.splits.length - half);
+      const diffSec = Math.round(firstHalfAvg - secondHalfAvg);
+      if (diffSec > 3) {
+        negativeSplitBadge = `<div style="background:rgba(67,232,137,0.15);color:var(--green);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;margin-bottom:12px;">🔥 Negative Split: You ran the second half ${diffSec}s faster than the first.</div>`;
+      }
+    }
+
+    splitsHtml = `
+      <div class="card">
+        <div class="section-title">SPLITS BREAKDOWN (1 KM)</div>
+        ${negativeSplitBadge}
+        <div>
+          ${act.splits.map((s, idx) => {
+            const isFastest = s.pace === minPace && act.splits.length > 1;
+            const barPct = Math.min(100, Math.max(30, 100 - ((s.pace - minPace) / ((maxPace - minPace) || 1)) * 50));
+            return `
+              <div class="split-row">
+                <span style="font-weight:700;width:50px;">KM ${s.km || idx + 1}</span>
+                <div class="split-bar">
+                  <div class="split-bar-fill" style="width:${barPct}%;background:${isFastest ? 'var(--primary)' : 'var(--blue)'};"></div>
+                </div>
+                <span style="font-weight:800;width:70px;text-align:right;color:${isFastest ? 'var(--primary)' : 'inherit'};">
+                  ${Format.pace(s.pace, act.type)}
+                </span>
+                <span style="font-size:11px;color:var(--text-muted);width:50px;text-align:right;">
+                  ${Format.elevation(s.elevationDelta)}
+                </span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <button class="btn btn-secondary btn-sm" onclick="Router.navigate('activities')">
+        ← Back to History
+      </button>
+    </div>
+
+    <div class="page-header" style="margin-bottom:16px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="font-size:24px;">${sportEmoji}</span>
+          <h1 class="page-title" style="font-size:24px;">${act.type.toUpperCase()}</h1>
+        </div>
+        <div class="page-subtitle">${Format.date(act.startTime)} · ${Format.time(act.startTime)}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="openShareCardModal('${act.id}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+          <span>Share Card</span>
+        </button>
+        <button class="btn btn-secondary btn-sm" onclick="exportGPX('${act.id}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>GPX</span>
+        </button>
+        <button class="btn btn-danger btn-sm" onclick="deleteActivity('${act.id}')">
+          Delete
+        </button>
+      </div>
+    </div>
+
+    <!-- Core Metrics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Distance</div>
+        <div class="stat-value" style="color:var(--primary);">${Format.distance(act.distance)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Duration</div>
+        <div class="stat-value">${Format.duration(act.duration)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Average Pace</div>
+        <div class="stat-value">${Format.pace(act.averagePace, act.type)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Elevation Gain</div>
+        <div class="stat-value">${Format.elevation(act.elevationGain)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Est Calories</div>
+        <div class="stat-value">${act.calories || 0} <span class="stat-unit">kcal</span></div>
+      </div>
+    </div>
+
+    <!-- Route Visualizer Map -->
+    <div class="card" style="padding:16px;">
+      <div class="section-title">GPS ROUTE VISUALIZATION</div>
+      <div class="route-visualizer" style="height:300px;">
+        ${RouteVisualizer.renderSVG(act.routePoints, 700, 300)}
+      </div>
+    </div>
+
+    <!-- Splits -->
+    ${splitsHtml}
+
+    <!-- Effort, RPE & Notes -->
+    <div class="card">
+      <div class="section-title">ATHLETE FEEDBACK</div>
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:14px;">
+        <div style="font-size:36px;">${act.feeling || '🙂'}</div>
+        <div>
+          <div style="font-weight:800;font-size:16px;">RPE ${act.rpe || 6} / 10</div>
+          <div style="font-size:13px;color:var(--text-secondary);">Subjective exertion & body response</div>
+        </div>
+      </div>
+      ${act.notes ? `
+        <div style="background:var(--surface-2);padding:14px;border-radius:var(--radius-sm);font-size:14px;line-height:1.6;">
+          "${act.notes}"
+        </div>
+      ` : '<div style="color:var(--text-muted);font-size:13px;font-style:italic;">No notes logged for this session.</div>'}
+    </div>
+  `;
+}
+
+// 5. INSIGHTS SCREEN
+function renderInsightsScreen() {
+  const container = document.getElementById('screen-insights');
+  if (!container) return;
+
+  const acts = AppState.activities;
+
+  // StrideOS Training Load Calculation
+  // load = sum(duration_minutes * (rpe / 5)) over last 7 days
+  const now = new Date();
+  const last7Days = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+  const recent7Acts = acts.filter(a => new Date(a.startTime) >= last7Days);
+
+  let loadScore = 0;
+  recent7Acts.forEach(a => {
+    const mins = (a.duration || 0) / 60;
+    const rpe = a.rpe || 6;
+    loadScore += Math.round(mins * (rpe / 5));
+  });
+
+  let loadCategory = 'Low';
+  let loadColor = 'var(--blue)';
+  if (loadScore > 500) { loadCategory = 'Very High'; loadColor = 'var(--red)'; }
+  else if (loadScore > 320) { loadCategory = 'High'; loadColor = 'var(--orange)'; }
+  else if (loadScore > 140) { loadCategory = 'Moderate'; loadColor = 'var(--green)'; }
+
+  // 7-Day Distance Data
+  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const last7BarData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 24 * 3600 * 1000);
+    const dayStr = d.toDateString();
+    const dayDist = acts
+      .filter(a => new Date(a.startTime).toDateString() === dayStr)
+      .reduce((acc, a) => acc + (a.distance || 0), 0);
+    last7BarData.push({
+      label: dayNames[d.getDay()],
+      value: Number(dayDist.toFixed(1))
+    });
+  }
+
+  // 30-Day Training Volume Data
+  const last30VolumeData = [];
+  for (let i = 29; i >= 0; i -= 3) {
+    const d = new Date(now.getTime() - i * 24 * 3600 * 1000);
+    const windowStart = new Date(now.getTime() - (i + 3) * 24 * 3600 * 1000);
+    const dist = acts
+      .filter(a => {
+        const t = new Date(a.startTime);
+        return t >= windowStart && t <= d;
+      })
+      .reduce((acc, a) => acc + (a.distance || 0), 0);
+    last30VolumeData.push({
+      label: `${d.getDate()}`,
+      value: Number(dist.toFixed(1))
+    });
+  }
+
+  // Estimated 5K Prediction Formula
+  const runActs = acts.filter(a => a.type === 'running' && a.distance >= 2.0 && a.averagePace > 0);
+  let est5KSec = null;
+  if (runActs.length > 0) {
+    const bestPace = Math.min(...runActs.map(a => a.averagePace));
+    est5KSec = Math.round(bestPace * 5.0);
+  }
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Performance Insights</h1>
+        <div class="page-subtitle">Deterministic training analysis · Zero cloud trackers</div>
+      </div>
+    </div>
+
+    <!-- Training Load Model Card -->
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+        <div>
+          <div class="section-title">STRIDEOS TRAINING LOAD (7-DAY)</div>
+          <div style="font-size:36px;font-weight:900;font-family:var(--font-mono);color:${loadColor};">
+            ${loadScore} <span style="font-size:16px;color:var(--text-secondary);font-family:var(--font-sans);">${loadCategory}</span>
+          </div>
+        </div>
+        <span style="background:var(--surface-2);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;color:var(--text-secondary);">
+          ${recent7Acts.length} sessions
+        </span>
+      </div>
+      <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;">
+        Calculated locally as duration weighted by rate of perceived exertion (RPE). A score of 150–350 indicates balanced progressive overload. This is a local StrideOS training heuristic and not a medical metric.
+      </p>
+    </div>
+
+    <!-- 7-Day Distance Bar Chart -->
+    <div class="card">
+      <div class="section-title">7-DAY DISTANCE (${Format.distUnit().toUpperCase()})</div>
+      ${ChartEngine.renderBars(last7BarData, 500, 160)}
+    </div>
+
+    <!-- 30-Day Training Volume Area Chart -->
+    <div class="card">
+      <div class="section-title">30-DAY TRAINING VOLUME TREND</div>
+      ${ChartEngine.renderArea(last30VolumeData, 500, 160, 'var(--blue)')}
+    </div>
+
+    <!-- Estimated 5K Performance -->
+    <div class="card">
+      <div class="section-title">ESTIMATED 5K BENCHMARK</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+        <div>
+          <div style="font-size:28px;font-weight:900;font-family:var(--font-mono);color:var(--primary);">
+            ${est5KSec ? Format.duration(est5KSec) : '--:--'}
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);">
+            ${est5KSec ? 'Calculated from your best sustained aerobic pace across logged runs.' : 'Record a few more runs of 2+ km to unlock an estimate.'}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// 6. GOALS SCREEN
+function renderGoalsScreen() {
+  const container = document.getElementById('screen-goals');
+  if (!container) return;
+
+  const goals = AppState.goals;
+  const acts = AppState.activities;
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Training Goals</h1>
+        <div class="page-subtitle">Set clear targets, stay consistent, measure progress</div>
+      </div>
+      <button class="btn btn-primary" onclick="openCreateGoalModal()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span>New Goal</span>
+      </button>
+    </div>
+
+    ${goals.length === 0 ? `
+      <div class="empty-state">
+        <svg class="empty-state-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+        <div class="empty-state-title">No active goals yet</div>
+        <div class="empty-state-text">Creating a distance or consistency target keeps your routine focused and intentional.</div>
+        <button class="btn btn-primary" onclick="openCreateGoalModal()">Create Your First Goal</button>
+      </div>
+    ` : goals.map(g => {
+      const pct = Math.min(100, Math.round((g.current / g.target) * 100));
+      return `
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+            <div>
+              <span style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--primary);text-transform:uppercase;">${g.period.toUpperCase()} TARGET</span>
+              <div style="font-size:18px;font-weight:800;margin-top:2px;">${g.title}</div>
+            </div>
+            <button class="btn btn-sm btn-danger" onclick="deleteGoal('${g.id}')">Delete</button>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:14px;margin-bottom:6px;">
+            <span>${g.current} / ${g.target} ${g.unit}</span>
+            <span style="color:var(--primary);font-weight:800;">${pct}%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width:${pct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join('')}
+  `;
+}
+
+function openCreateGoalModal() {
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">Create Training Goal</div>
+        <button class="btn-icon" onclick="closeModal()">✕</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal Title</label>
+        <input type="text" id="goal-title" class="form-input" placeholder="e.g. Run 100 km this month">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Goal Type</label>
+        <select id="goal-type" class="form-select">
+          <option value="distance">Distance Target</option>
+          <option value="activities">Activity Count</option>
+          <option value="streak">Streak Days</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Target Number</label>
+        <input type="number" id="goal-target" class="form-input" placeholder="100" value="100">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Period</label>
+        <select id="goal-period" class="form-select">
+          <option value="monthly">This Month</option>
+          <option value="weekly">Weekly</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="saveNewGoal()">Save Goal</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
+}
+
+async function saveNewGoal() {
+  const title = document.getElementById('goal-title').value.trim() || 'Custom Goal';
+  const type = document.getElementById('goal-type').value;
+  const target = Number(document.getElementById('goal-target').value) || 50;
+  const period = document.getElementById('goal-period').value;
+
+  const goal = {
+    id: 'goal_' + Date.now(),
+    title,
+    type,
+    target,
+    current: 0,
+    unit: type === 'distance' ? Format.distUnit() : 'sessions',
+    period,
+    createdAt: new Date().toISOString()
+  };
+
+  AppState.goals.push(goal);
+  await DB.put('goals', goal);
+  closeModal();
+  showToast('Goal created!');
+  renderGoalsScreen();
+}
+
+async function deleteGoal(id) {
+  if (confirm('Delete this goal?')) {
+    AppState.goals = AppState.goals.filter(g => g.id !== id);
+    await DB.delete('goals', id);
+    showToast('Goal removed');
+    renderGoalsScreen();
+  }
+}
+
+// 7. TRAINING PLANS SCREEN
+function renderPlansScreen() {
+  const container = document.getElementById('screen-plans');
+  if (!container) return;
+
+  const plans = BUILTIN_PLANS;
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Structured Plans</h1>
+        <div class="page-subtitle">Periodized training schedules for all endurance disciplines</div>
+      </div>
+    </div>
+
+    ${plans.map(p => `
+      <div class="card" style="margin-bottom:20px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span style="font-size:18px;">${p.sport === 'cycling' ? '🚴' : '🏃'}</span>
+              <span style="font-size:20px;font-weight:900;">${p.title}</span>
+            </div>
+            <div style="font-size:13px;color:var(--text-secondary);margin-top:2px;">${p.description}</div>
+          </div>
+          <span style="background:var(--surface-3);color:var(--primary);padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;">
+            ${p.durationWeeks} WEEKS · ${p.level}
+          </span>
+        </div>
+
+        <div style="margin-top:16px;">
+          <div class="section-title">WEEK 1 WORKOUTS</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:10px;">
+            ${p.weeks[0].workouts.map(w => `
+              <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;">
+                <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);font-weight:700;">
+                  <span>${w.day}</span>
+                  <span>${w.distanceKm} KM</span>
+                </div>
+                <div style="font-weight:800;font-size:14px;margin:4px 0;">${w.title}</div>
+                <div style="font-size:12px;color:var(--text-secondary);">${w.notes}</div>
+                <button class="btn btn-primary btn-sm" style="width:100%;margin-top:10px;" onclick="startPlanWorkout('${p.sport}', ${w.distanceKm})">
+                  Start Session
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  `;
+}
+
+function startPlanWorkout(sport, distKm) {
+  Recorder.initSport(sport);
+  Router.navigate('record');
+  showToast(`Loaded ${distKm} km workout into recorder`);
+}
+
+// 8. PERSONAL RECORDS SCREEN
+function renderRecordsScreen() {
+  const container = document.getElementById('screen-records');
+  if (!container) return;
+
+  const prs = AppState.prs || {};
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Personal Records</h1>
+        <div class="page-subtitle">Automatically verified bests across all recorded sessions</div>
+      </div>
+    </div>
+
+    <div class="section-title">RUNNING RECORDS</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Fastest 1K</div>
+        <div class="stat-value" style="color:var(--primary);">${prs.run1K ? Format.duration(prs.run1K.time) : '--:--'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.run1K ? Format.date(prs.run1K.date) : 'Not achieved'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Fastest 5K</div>
+        <div class="stat-value" style="color:var(--primary);">${prs.run5K ? Format.duration(prs.run5K.time) : '--:--'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.run5K ? Format.date(prs.run5K.date) : 'Not achieved'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Fastest 10K</div>
+        <div class="stat-value" style="color:var(--primary);">${prs.run10K ? Format.duration(prs.run10K.time) : '--:--'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.run10K ? Format.date(prs.run10K.date) : 'Not achieved'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Longest Run</div>
+        <div class="stat-value">${prs.runLongest ? Format.distance(prs.runLongest.distance) : '0.0 km'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.runLongest ? Format.date(prs.runLongest.date) : 'Not achieved'}</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:20px;">CYCLING RECORDS</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Longest Ride</div>
+        <div class="stat-value">${prs.rideLongest ? Format.distance(prs.rideLongest.distance) : '0.0 km'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.rideLongest ? Format.date(prs.rideLongest.date) : 'Not achieved'}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Top Avg Speed</div>
+        <div class="stat-value">${prs.rideSpeed ? `${prs.rideSpeed.speed.toFixed(1)} km/h` : '--.-'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.rideSpeed ? Format.date(prs.rideSpeed.date) : 'Not achieved'}</div>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-top:20px;">SWIMMING RECORDS</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Longest Swim</div>
+        <div class="stat-value">${prs.swimLongest ? Format.distance(prs.swimLongest.distance) : '0.0 km'}</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">${prs.swimLongest ? Format.date(prs.swimLongest.date) : 'Not achieved'}</div>
+      </div>
+    </div>
+  `;
+}
+
+// 9. SETTINGS SCREEN
+function renderSettingsScreen() {
+  const container = document.getElementById('screen-settings');
+  if (!container) return;
+
+  const s = AppState.settings;
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Settings</h1>
+        <div class="page-subtitle">Configure hardware, audio coaching, units, and appearance</div>
+      </div>
+    </div>
+
+    <!-- Units & Sports -->
+    <div class="card">
+      <div class="section-title">UNITS & PREFERENCES</div>
+      <div class="form-group">
+        <label class="form-label">Measurement Units</label>
+        <select class="form-select" onchange="updateSetting('units', this.value)">
+          <option value="metric" ${s.units === 'metric' ? 'selected' : ''}>Metric (km, min/km, meters)</option>
+          <option value="imperial" ${s.units === 'imperial' ? 'selected' : ''}>Imperial (miles, min/mi, feet)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Default Sport</label>
+        <select class="form-select" onchange="updateSetting('defaultSport', this.value)">
+          <option value="running" ${s.defaultSport === 'running' ? 'selected' : ''}>Running</option>
+          <option value="cycling" ${s.defaultSport === 'cycling' ? 'selected' : ''}>Cycling</option>
+          <option value="swimming" ${s.defaultSport === 'swimming' ? 'selected' : ''}>Swimming</option>
+        </select>
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Weekly Distance Goal (${Format.distUnit()})</label>
+        <input type="number" class="form-input" value="${s.weeklyGoal}" onchange="updateSetting('weeklyGoal', Number(this.value))">
+      </div>
+    </div>
+
+    <!-- Recording Engine Settings -->
+    <div class="card">
+      <div class="section-title">RECORDING ENGINE</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700;">Auto-Pause</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Pause recording when moving below 3 km/h</div>
+        </div>
+        <input type="checkbox" ${s.autoPause ? 'checked' : ''} style="width:20px;height:20px;accent-color:var(--primary);" onchange="updateSetting('autoPause', this.checked)">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);">
+        <div>
+          <div style="font-weight:700;">Audio Voice Coaching</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Split pace announcements via Web Speech API</div>
+        </div>
+        <input type="checkbox" ${s.audioCues ? 'checked' : ''} style="width:20px;height:20px;accent-color:var(--primary);" onchange="updateSetting('audioCues', this.checked)">
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;">
+        <div>
+          <div style="font-weight:700;">Haptic Vibration Feedback</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Vibrate on start, pause, split and finish</div>
+        </div>
+        <input type="checkbox" ${s.haptics ? 'checked' : ''} style="width:20px;height:20px;accent-color:var(--primary);" onchange="updateSetting('haptics', this.checked)">
+      </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="card">
+      <div class="section-title">APPEARANCE & ACCESSIBILITY</div>
+      <div class="form-group">
+        <label class="form-label">Theme</label>
+        <select class="form-select" onchange="updateTheme(this.value)">
+          <option value="dark" ${s.theme === 'dark' ? 'selected' : ''}>Athletic Dark (Recommended)</option>
+          <option value="light" ${s.theme === 'light' ? 'selected' : ''}>High-Contrast Light</option>
+        </select>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;">
+        <div>
+          <div style="font-weight:700;">Reduced Motion</div>
+          <div style="font-size:12px;color:var(--text-secondary);">Disable screen entry and route pulse animations</div>
+        </div>
+        <input type="checkbox" ${s.reducedMotion ? 'checked' : ''} style="width:20px;height:20px;accent-color:var(--primary);" onchange="updateSetting('reducedMotion', this.checked)">
+      </div>
+    </div>
+  `;
+}
+
+async function updateSetting(key, val) {
+  AppState.settings[key] = val;
+  await DB.put('settings', AppState.settings);
+  showToast('Settings updated');
+}
+
+function updateTheme(val) {
+  AppState.settings.theme = val;
+  document.body.setAttribute('data-theme', val);
+  DB.put('settings', AppState.settings);
+  showToast(`Theme changed to ${val}`);
+}
+
+// 10. PRIVACY & DATA MANAGEMENT SCREEN
+function renderPrivacyScreen() {
+  const container = document.getElementById('screen-privacy');
+  if (!container) return;
+
+  const acts = AppState.activities;
+  const storageApproxKb = Math.round(JSON.stringify(AppState).length / 1024);
+
+  container.innerHTML = `
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Privacy & Data Center</h1>
+        <div class="page-subtitle">Your training. Your device. Your data.</div>
+      </div>
+    </div>
+
+    <!-- Privacy Manifesto Card -->
+    <div class="card" style="border-left: 4px solid var(--primary);background:var(--surface);">
+      <div style="display:flex;gap:14px;align-items:flex-start;">
+        <div style="font-size:32px;">🔒</div>
+        <div>
+          <div style="font-size:20px;font-weight:900;letter-spacing:-0.4px;">Your data stays on this device.</div>
+          <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.6;margin-top:6px;">
+            StrideOS stores your training data locally in your browser's IndexedDB. Your GPS traces, pace numbers, notes, and records are never automatically uploaded to any remote server or third-party analytics company. No advertising tracker. No account required.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Stats Card -->
+    <div class="card">
+      <div class="section-title">LOCAL STORAGE METRICS</div>
+      <div class="stats-grid" style="margin-bottom:14px;">
+        <div class="stat-card">
+          <div class="stat-label">Total Activities</div>
+          <div class="stat-value">${acts.length}</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Estimated Storage</div>
+          <div class="stat-value">${storageApproxKb} <span class="stat-unit">KB</span></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Database Status</div>
+          <div class="stat-value" style="color:var(--green);font-size:18px;">Ready</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:10px;">
+        <button class="btn btn-primary btn-sm" onclick="exportJSONBackup()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export All Data (JSON)</span>
+        </button>
+
+        <label class="btn btn-secondary btn-sm" style="margin:0;cursor:pointer;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Import Backup (JSON)</span>
+          <input type="file" accept=".json" style="display:none;" onchange="importJSONBackup(this)">
+        </label>
+
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>Export Summary (CSV)</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Demo Data & Reset -->
+    <div class="card">
+      <div class="section-title">SAMPLE DATA & SYSTEM RESET</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-secondary btn-sm" onclick="seedDemoData()">Load Realistic Demo Data</button>
+        <button class="btn btn-secondary btn-sm" onclick="removeDemoData()">Remove Demo Data</button>
+        <button class="btn btn-danger btn-sm" onclick="confirmClearAllData()">Delete All Data</button>
+      </div>
+    </div>
+  `;
+}
+
+// ==========================================
+// Exports & Share Card Generator (Canvas)
+// ==========================================
+
+function openShareCardModal(actId) {
+  const act = AppState.activities.find(a => a.id === actId);
+  if (!act) return;
+
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML = `
+    <div class="modal-box" style="text-align:center;">
+      <div class="modal-header">
+        <div class="modal-title">Shareable Activity Card</div>
+        <button class="btn-icon" onclick="closeModal()">✕</button>
+      </div>
+      <div style="border-radius:var(--radius-md);overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow);">
+        <canvas id="share-card-canvas" width="600" height="600" style="width:100%;max-width:340px;height:auto;border-radius:12px;display:block;margin:0 auto;background:#08090b;"></canvas>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" style="flex:2;" onclick="downloadShareCard()">Download PNG</button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
+
+  // Draw Card to Canvas
+  setTimeout(() => {
+    drawShareCard(act);
+  }, 50);
+}
+
+function drawShareCard(act) {
+  const canvas = document.getElementById('share-card-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+
+  // Background
+  ctx.fillStyle = '#08090b';
+  ctx.fillRect(0, 0, w, h);
+
+  // Border frame
+  ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(16, 16, w - 32, h - 32);
+
+  // Brand Header
+  ctx.fillStyle = '#b8ff3d';
+  ctx.font = '900 24px -apple-system, sans-serif';
+  ctx.fillText('STRIDEOS 3.0', 40, 60);
+
+  ctx.fillStyle = '#68707d';
+  ctx.font = '700 12px monospace';
+  ctx.fillText('PRIVATE · LOCAL · OFFLINE', 40, 82);
+
+  // Sport & Date
+  const emoji = act.type === 'cycling' ? '🚴 RIDE' : act.type === 'swimming' ? '🏊 SWIM' : '🏃 RUN';
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '800 18px -apple-system, sans-serif';
+  ctx.fillText(`${emoji} · ${Format.date(act.startTime).toUpperCase()}`, 40, 130);
+
+  // Big Distance
+  ctx.fillStyle = '#ffffff';
+  ctx.font = '900 68px monospace';
+  ctx.fillText(Format.distance(act.distance, false), 40, 205);
+
+  ctx.fillStyle = '#b8ff3d';
+  ctx.font = '700 22px -apple-system, sans-serif';
+  ctx.fillText(Format.distUnit().toUpperCase(), 40 + ctx.measureText(Format.distance(act.distance, false)).width + 12, 175);
+
+  // 3-Columns: Duration, Pace, Elevation
+  ctx.fillStyle = '#9ba3af';
+  ctx.font = '700 13px -apple-system, sans-serif';
+  ctx.fillText('DURATION', 40, 260);
+  ctx.fillText('AVG PACE', 230, 260);
+  ctx.fillText('ELEVATION', 420, 260);
+
+  ctx.fillStyle = '#f5f7fa';
+  ctx.font = '800 26px monospace';
+  ctx.fillText(Format.duration(act.duration), 40, 295);
+  ctx.fillText(Format.pace(act.averagePace, act.type), 230, 295);
+  ctx.fillText(Format.elevation(act.elevationGain), 420, 295);
+
+  // Draw Route Polyline if coordinates exist
+  if (act.routePoints && act.routePoints.length >= 2) {
+    const pts = act.routePoints;
+    let minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+    pts.forEach(p => {
+      if (p.lat < minLat) minLat = p.lat;
+      if (p.lat > maxLat) maxLat = p.lat;
+      if (p.lon < minLon) minLon = p.lon;
+      if (p.lon > maxLon) maxLon = p.lon;
+    });
+
+    const boxX = 40;
+    const boxY = 340;
+    const boxW = w - 80;
+    const boxH = 200;
+
+    const latSpan = (maxLat - minLat) || 0.0001;
+    const lonSpan = (maxLon - minLon) || 0.0001;
+    const scale = Math.min(boxW / lonSpan, boxH / latSpan);
+    const offX = boxX + (boxW - lonSpan * scale) / 2;
+    const offY = boxY + (boxH - latSpan * scale) / 2;
+
+    ctx.strokeStyle = '#b8ff3d';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.beginPath();
+
+    pts.forEach((p, i) => {
+      const x = offX + (p.lon - minLon) * scale;
+      const y = boxY + boxH - ((p.lat - minLat) * scale);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  } else {
+    ctx.fillStyle = '#68707d';
+    ctx.font = '600 14px -apple-system, sans-serif';
+    ctx.fillText('“Train with clarity. Move with purpose.”', 40, 440);
+  }
+
+  // Footer Tagline
+  ctx.fillStyle = '#68707d';
+  ctx.font = '600 12px monospace';
+  ctx.fillText('STRIDEOS.LOCAL · NO CLOUD TRACKING', 40, 560);
+}
+
+function downloadShareCard() {
+  const canvas = document.getElementById('share-card-canvas');
+  if (!canvas) return;
+  const link = document.createElement('a');
+  link.download = `StrideOS-Activity-${Date.now()}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('Share card downloaded!');
+}
+
+function exportGPX(actId) {
+  const act = AppState.activities.find(a => a.id === actId);
+  if (!act || !act.routePoints || act.routePoints.length < 2) {
+    showToast('No GPS track available to export for this activity');
+    return;
+  }
+
+  const gpx = `<?xml version="1.0" encoding="UTF-8"?>
+<gpx version="1.1" creator="StrideOS 3.0 - Private Personal Training OS" xmlns="http://www.topografix.com/GPX/1/1">
+  <metadata>
+    <name>${act.type.toUpperCase()} - StrideOS</name>
+    <time>${act.startTime}</time>
+  </metadata>
+  <trk>
+    <name>${act.type.toUpperCase()}</name>
+    <type>${act.type.toUpperCase()}</type>
+    <trkseg>
+      ${act.routePoints.map(p => `
+      <trkpt lat="${p.lat}" lon="${p.lon}">
+        <ele>${p.alt || 0}</ele>
+        <time>${new Date(p.time).toISOString()}</time>
+      </trkpt>`).join('')}
+    </trkseg>
+  </trk>
+</gpx>`;
+
+  const blob = new Blob([gpx], { type: 'application/gpx+xml' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `StrideOS_${act.type}_${act.id}.gpx`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('GPX exported!');
+}
+
+function exportJSONBackup() {
+  const data = {
+    strideOSVersion: '3.0.0',
+    exportDate: new Date().toISOString(),
+    settings: AppState.settings,
+    activities: AppState.activities,
+    goals: AppState.goals,
+    prs: AppState.prs
+  };
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `StrideOS_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Full backup downloaded!');
+}
+
+async function importJSONBackup(input) {
+  const file = input.files?.[0];
+  if (!file) return;
+
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+
+    if (!data.activities && !data.settings) {
+      alert('Invalid StrideOS backup file format.');
+      return;
+    }
+
+    if (confirm(`Import ${data.activities ? data.activities.length : 0} activities? Existing activities will be merged.`)) {
+      if (data.activities && Array.isArray(data.activities)) {
+        for (const act of data.activities) {
+          await DB.put('activities', act);
+        }
+      }
+      if (data.goals && Array.isArray(data.goals)) {
+        for (const g of data.goals) {
+          await DB.put('goals', g);
+        }
+      }
+      if (data.prs) {
+        await DB.put('personalRecords', { id: 'user_prs', records: data.prs });
+      }
+
+      await loadAppData();
+      showToast('Backup successfully imported!');
+      Router.navigate('home');
+    }
+  } catch (err) {
+    alert('Error importing JSON: ' + err.message);
+  }
+}
+
+function exportCSV() {
+  const acts = AppState.activities;
+  if (!acts.length) {
+    showToast('No activities to export');
+    return;
+  }
+
+  const headers = ['ID', 'Date', 'Sport', 'Distance_km', 'Duration_sec', 'AvgPace_sec_km', 'Elevation_m', 'Calories', 'RPE', 'Feeling', 'Notes'];
+  const rows = acts.map(a => [
+    a.id,
+    a.startTime,
+    a.type,
+    a.distance,
+    a.duration,
+    a.averagePace,
+    a.elevationGain,
+    a.calories,
+    a.rpe,
+    a.feeling,
+    `"${(a.notes || '').replace(/"/g, '""')}"`
+  ]);
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `StrideOS_Activities_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Activities CSV exported!');
+}
+
+async function deleteActivity(id) {
+  if (confirm('Permanently delete this activity?')) {
+    await DB.delete('activities', id);
+    AppState.activities = AppState.activities.filter(a => a.id !== id);
+    showToast('Activity deleted');
+    Router.navigate('activities');
+  }
+}
+
+async function confirmClearAllData() {
+  if (confirm('This permanently removes ALL StrideOS activity data from this device. Are you completely sure?')) {
+    await DB.clear('activities');
+    await DB.clear('goals');
+    await DB.clear('personalRecords');
+    AppState.activities = [];
+    AppState.goals = [];
+    AppState.prs = {};
+    showToast('All local data removed');
+    Router.navigate('home');
+  }
+}
+
+// ==========================================
+// Demo Data Generator
+// ==========================================
+async function seedDemoData() {
+  const now = Date.now();
+  const day = 24 * 3600 * 1000;
+
+  // Realistic sample GPS loop coords in a park
+  const sampleParkLoop = [
+    { lat: 37.7749, lon: -122.4194, alt: 22, time: now - 3600000 },
+    { lat: 37.7758, lon: -122.4182, alt: 25, time: now - 3300000 },
+    { lat: 37.7772, lon: -122.4170, alt: 32, time: now - 3000000 },
+    { lat: 37.7790, lon: -122.4185, alt: 44, time: now - 2700000 },
+    { lat: 37.7801, lon: -122.4210, alt: 48, time: now - 2400000 },
+    { lat: 37.7792, lon: -122.4235, alt: 41, time: now - 2100000 },
+    { lat: 37.7775, lon: -122.4248, alt: 30, time: now - 1800000 },
+    { lat: 37.7755, lon: -122.4225, alt: 24, time: now - 1500000 },
+    { lat: 37.7749, lon: -122.4194, alt: 22, time: now - 1200000 }
+  ];
+
+  const demoActs = [
+    {
+      id: 'demo_1',
+      type: 'running',
+      isDemo: true,
+      startTime: new Date(now - 1 * day).toISOString(),
+      endTime: new Date(now - 1 * day + 2652000).toISOString(),
+      duration: 2652, // 44:12
+      distance: 8.42,
+      averagePace: 315, // 5:15/km
+      speed: 11.4,
+      elevationGain: 84,
+      calories: 640,
+      routePoints: sampleParkLoop,
+      splits: [
+        { km: 1, duration: 308, pace: 308, elevationDelta: 3 },
+        { km: 2, duration: 314, pace: 314, elevationDelta: 8 },
+        { km: 3, duration: 319, pace: 319, elevationDelta: 12 },
+        { km: 4, duration: 312, pace: 312, elevationDelta: -4 },
+        { km: 5, duration: 310, pace: 310, elevationDelta: 2 },
+        { km: 6, duration: 305, pace: 305, elevationDelta: 5 },
+        { km: 7, duration: 298, pace: 298, elevationDelta: 14 },
+        { km: 8, duration: 294, pace: 294, elevationDelta: -2 }
+      ],
+      feeling: '🔥',
+      rpe: 8,
+      notes: 'Strong negative split. Felt comfortable breathing in rhythm from km 4 onward.'
+    },
+    {
+      id: 'demo_2',
+      type: 'running',
+      isDemo: true,
+      startTime: new Date(now - 3 * day).toISOString(),
+      endTime: new Date(now - 3 * day + 1638000).toISOString(),
+      duration: 1638, // 27:18
+      distance: 5.10,
+      averagePace: 321, // 5:21/km
+      speed: 11.2,
+      elevationGain: 34,
+      calories: 390,
+      routePoints: sampleParkLoop.slice(0, 6),
+      splits: [
+        { km: 1, duration: 325, pace: 325, elevationDelta: 6 },
+        { km: 2, duration: 322, pace: 322, elevationDelta: 8 },
+        { km: 3, duration: 320, pace: 320, elevationDelta: 4 },
+        { km: 4, duration: 318, pace: 318, elevationDelta: -2 },
+        { km: 5, duration: 315, pace: 315, elevationDelta: 2 }
+      ],
+      feeling: '🙂',
+      rpe: 6,
+      notes: 'Easy aerobic session. Recovery felt smooth.'
+    },
+    {
+      id: 'demo_3',
+      type: 'cycling',
+      isDemo: true,
+      startTime: new Date(now - 5 * day).toISOString(),
+      endTime: new Date(now - 5 * day + 6138000).toISOString(),
+      duration: 6138, // 1:42:18
+      distance: 42.6,
+      averagePace: 144, // 24.9 km/h
+      speed: 24.9,
+      elevationGain: 412,
+      calories: 980,
+      routePoints: sampleParkLoop,
+      splits: [],
+      feeling: '🔥',
+      rpe: 8,
+      notes: 'Endurance loop with hill repetitions in the middle.'
+    },
+    {
+      id: 'demo_4',
+      type: 'swimming',
+      isDemo: true,
+      startTime: new Date(now - 6 * day).toISOString(),
+      endTime: new Date(now - 6 * day + 1920000).toISOString(),
+      duration: 1920, // 32:00
+      distance: 1.5,
+      averagePace: 1280, // ~2:08/100m
+      speed: 2.8,
+      elevationGain: 0,
+      calories: 360,
+      routePoints: [],
+      splits: [],
+      feeling: '🙂',
+      rpe: 7,
+      notes: '60 laps in 25m pool. Focus on high elbow catch.'
+    }
+  ];
+
+  for (const act of demoActs) {
+    await DB.put('activities', act);
+    PRManager.checkNewPRs(act);
+  }
+
+  await loadAppData();
+  showToast('Realistic sample training data loaded!');
+  Router.navigate('home');
+}
+
+async function removeDemoData() {
+  const nonDemo = AppState.activities.filter(a => !a.isDemo);
+  await DB.clear('activities');
+  for (const a of nonDemo) {
+    await DB.put('activities', a);
+  }
+  await loadAppData();
+  showToast('Sample demo activities removed');
+  Router.navigate('home');
+}
+
+// ==========================================
+// Modals & UI Helpers
+// ==========================================
+function closeModal() {
+  const modal = document.getElementById('modal-container');
+  if (modal) modal.classList.remove('active');
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+function showPRModal(pr) {
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML = `
+    <div class="modal-box" style="text-align:center;">
+      <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+      <div style="color:var(--primary);font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;">NEW PERSONAL BEST</div>
+      <div style="font-size:26px;font-weight:900;margin:6px 0;">${pr.title}</div>
+      <div style="font-size:36px;font-weight:900;font-family:var(--font-mono);color:var(--primary);margin-bottom:8px;">
+        ${pr.unit === 'time' ? Format.duration(pr.current) : (pr.unit === 'dist' ? Format.distance(pr.current) : `${pr.current.toFixed(1)} km/h`)}
+      </div>
+      <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">
+        ${pr.prev ? `Improved from ${pr.unit === 'time' ? Format.duration(pr.prev) : pr.prev}!` : 'First logged benchmark for this record category.'}
+      </p>
+      <button class="btn btn-primary" style="width:100%;" onclick="closeModal()">Awesome!</button>
+    </div>
+  `;
+  modal.classList.add('active');
+  AudioCoach.speak('Congratulations! New personal best achieved.');
+  AudioCoach.haptic([100, 50, 100, 50, 200]);
+}
+
+function openMoreMenu() {
+  const modal = document.getElementById('modal-container');
+  modal.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">More StrideOS Features</div>
+        <button class="btn-icon" onclick="closeModal()">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <button class="btn btn-secondary" style="justify-content:flex-start;padding:14px;" onclick="closeModal(); Router.navigate('goals');">
+          🎯 Goals & Targets
+        </button>
+        <button class="btn btn-secondary" style="justify-content:flex-start;padding:14px;" onclick="closeModal(); Router.navigate('plans');">
+          ▣ Training Plans
+        </button>
+        <button class="btn btn-secondary" style="justify-content:flex-start;padding:14px;" onclick="closeModal(); Router.navigate('records');">
+          🏆 Personal Records
+        </button>
+        <button class="btn btn-secondary" style="justify-content:flex-start;padding:14px;" onclick="closeModal(); Router.navigate('settings');">
+          ⚙ Settings & Hardware
+        </button>
+        <button class="btn btn-secondary" style="justify-content:flex-start;padding:14px;" onclick="closeModal(); Router.navigate('privacy');">
+          🔒 Privacy & Data Center
+        </button>
+      </div>
+    </div>
+  `;
+  modal.classList.add('active');
+}
+
+// ==========================================
+// Onboarding Flow
+// ==========================================
+let onboardingStep = 1;
+const onboardingData = {
+  sports: ['running'],
+  goal: 'Build endurance',
+  weeklyTarget: 25
+};
+
+function checkOnboarding() {
+  if (!AppState.settings.onboardingComplete) {
+    document.getElementById('onboarding-overlay').classList.add('active');
+    renderOnboardingStep(1);
+  }
+}
+
+function renderOnboardingStep(step) {
+  onboardingStep = step;
+  const c = document.getElementById('onboarding-content');
+  if (!c) return;
+
+  if (step === 1) {
+    c.innerHTML = `
+      <div style="text-align:center;">
+        <div style="width:48px;height:48px;background:var(--primary);color:#08090b;font-size:26px;font-weight:900;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">S</div>
+        <h2 style="font-size:24px;font-weight:900;margin-bottom:6px;">Welcome to StrideOS</h2>
+        <div style="font-size:14px;color:var(--text-secondary);margin-bottom:24px;">Your training. Your device. Your data.</div>
+        <div style="background:var(--surface-2);border-radius:var(--radius-md);padding:16px;text-align:left;font-size:13.5px;line-height:1.7;color:var(--text);margin-bottom:24px;">
+          ✓ 100% Offline-First & Private<br>
+          ✓ No Account or Cloud Database Required<br>
+          ✓ Hardware GPS Tracking & Audio Coaching<br>
+          ✓ Training Load & PR Auto-Detection
+        </div>
+        <button class="btn btn-primary" style="width:100%;height:48px;" onclick="renderOnboardingStep(2)">Get Started →</button>
+      </div>
+    `;
+  } else if (step === 2) {
+    c.innerHTML = `
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--primary);text-transform:uppercase;">STEP 2 OF 4</div>
+        <h2 style="font-size:22px;font-weight:900;margin:4px 0 16px;">What sports do you train?</h2>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
+          <label style="display:flex;align-items:center;gap:12px;background:var(--surface-2);padding:12px 16px;border-radius:var(--radius-sm);cursor:pointer;">
+            <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--primary);">
+            <span style="font-weight:700;">🏃 Running</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;background:var(--surface-2);padding:12px 16px;border-radius:var(--radius-sm);cursor:pointer;">
+            <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--primary);">
+            <span style="font-weight:700;">🚴 Cycling</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:12px;background:var(--surface-2);padding:12px 16px;border-radius:var(--radius-sm);cursor:pointer;">
+            <input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--primary);">
+            <span style="font-weight:700;">🏊 Swimming</span>
+          </label>
+        </div>
+        <button class="btn btn-primary" style="width:100%;height:48px;" onclick="renderOnboardingStep(3)">Continue</button>
+      </div>
+    `;
+  } else if (step === 3) {
+    c.innerHTML = `
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--primary);text-transform:uppercase;">STEP 3 OF 4</div>
+        <h2 style="font-size:22px;font-weight:900;margin:4px 0 16px;">What's your primary goal?</h2>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;">
+          <button class="btn btn-secondary" style="justify-content:flex-start;padding:12px;" onclick="onboardingData.goal='Build endurance'; renderOnboardingStep(4);">🎯 Build Endurance</button>
+          <button class="btn btn-secondary" style="justify-content:flex-start;padding:12px;" onclick="onboardingData.goal='Get faster'; renderOnboardingStep(4);">⚡ Get Faster (PRs)</button>
+          <button class="btn btn-secondary" style="justify-content:flex-start;padding:12px;" onclick="onboardingData.goal='Stay consistent'; renderOnboardingStep(4);">🔥 Stay Consistent</button>
+          <button class="btn btn-secondary" style="justify-content:flex-start;padding:12px;" onclick="onboardingData.goal='Race prep'; renderOnboardingStep(4);">🏁 Race Preparation</button>
+        </div>
+      </div>
+    `;
+  } else if (step === 4) {
+    c.innerHTML = `
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--primary);text-transform:uppercase;">STEP 4 OF 4</div>
+        <h2 style="font-size:22px;font-weight:900;margin:4px 0 6px;">Weekly target</h2>
+        <div style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Configure your weekly volume baseline.</div>
+        <div style="background:var(--surface-2);padding:20px;border-radius:var(--radius-md);text-align:center;margin-bottom:24px;">
+          <div id="ob-target-val" style="font-size:42px;font-weight:900;font-family:var(--font-mono);color:var(--primary);">25 km</div>
+          <input type="range" min="10" max="80" step="5" value="25" style="width:100%;margin-top:12px;accent-color:var(--primary);" oninput="onboardingData.weeklyTarget = Number(this.value); document.getElementById('ob-target-val').textContent = this.value + ' km';">
+        </div>
+        <button class="btn btn-primary" style="width:100%;height:52px;font-size:16px;" onclick="finishOnboarding()">START TRAINING</button>
+      </div>
+    `;
+  }
+}
+
+async function finishOnboarding() {
+  AppState.settings.weeklyGoal = onboardingData.weeklyTarget || 25;
+  AppState.settings.goalFocus = onboardingData.goal;
+  AppState.settings.onboardingComplete = true;
+  await DB.put('settings', AppState.settings);
+  document.getElementById('onboarding-overlay').classList.remove('active');
+  showToast('Welcome to StrideOS 3.0!');
+  Router.navigate('home');
+}
+
+// ==========================================
+// Initialization Lifecycle
+// ==========================================
+async function loadAppData() {
+  try {
+    const savedSettings = await DB.get('settings', 'user_settings');
+    if (savedSettings) AppState.settings = { ...AppState.settings, ...savedSettings };
+
+    const acts = await DB.getAll('activities');
+    AppState.activities = acts.sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+
+    const goals = await DB.getAll('goals');
+    AppState.goals = goals;
+
+    const prDoc = await DB.get('personalRecords', 'user_prs');
+    if (prDoc && prDoc.records) AppState.prs = prDoc.records;
+
+    // Apply theme
+    if (AppState.settings.theme) {
+      document.body.setAttribute('data-theme', AppState.settings.theme);
+    }
+  } catch (err) {
+    console.error('Error loading StrideOS data:', err);
+  }
+}
+
+async function initStrideOS() {
+  try {
+    await DB.init();
+    await loadAppData();
+    checkOnboarding();
+    Router.navigate('home');
+  } catch (err) {
+    console.error('Fatal initialization error:', err);
+  }
+}
+
+// Start application when DOM is ready
+window.addEventListener('DOMContentLoaded', () => {
+  initStrideOS();
+});
+</script>
+</body>
+</html>
